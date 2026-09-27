@@ -128,7 +128,7 @@ function Catalogo() {
         <legend className="mb-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
           Servidor
         </legend>
-        <div className="space-y-2">
+        <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
           {SERVERS.map((server) => (
             <Check
               key={server}

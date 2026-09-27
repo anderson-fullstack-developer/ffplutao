@@ -5,6 +5,7 @@ import { ImagePlus, Loader2, Lock, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, FormSection, Input, Select, Textarea } from "@/components/ui/field";
 import { accountImages } from "@/mock/accounts";
+import { SERVERS } from "@/lib/catalog";
 import type { Account } from "@/types";
 
 export function AccountForm({ account }: { account?: Account }) {
@@ -73,10 +74,9 @@ export function AccountForm({ account }: { account?: Account }) {
           </Field>
           <Field label="Servidor" htmlFor="f-servidor">
             <Select id="f-servidor" defaultValue={account?.server}>
-              <option>África e o Oriente Médio</option>
-              <option>Brasil</option>
-              <option>Europa</option>
-              <option>América Latina</option>
+              {SERVERS.map((server) => (
+                <option key={server}>{server}</option>
+              ))}
             </Select>
           </Field>
           <Field label="Ano da conta" htmlFor="f-ano">

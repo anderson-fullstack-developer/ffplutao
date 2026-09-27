@@ -36,7 +36,25 @@ export interface PublicAccount {
   publishedAt: string | null;
 }
 
-export const SERVERS = ["Brasil", "Europa", "América Latina"] as const;
+/** Servidores (regiões) do Free Fire. Ordem = ordem nos formulários e filtros. */
+export const SERVERS = [
+  "Brasil",
+  "Europa",
+  "América Latina",
+  "América do Norte",
+  "África e o Oriente Médio",
+  "Rússia e CEI",
+  "Índia",
+  "Paquistão",
+  "Bangladesh",
+  "Indonésia",
+  "Tailândia",
+  "Vietname",
+  "Singapura",
+  "Taiwan",
+] as const;
+
+export type GameServer = (typeof SERVERS)[number];
 
 export const PRICE_RANGES = [
   { value: "todos", label: "Todos", min: null, max: null },
