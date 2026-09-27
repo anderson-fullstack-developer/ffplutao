@@ -20,6 +20,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminClientesRouteImport } from './routes/admin/clientes'
 import { Route as AdminPedidosRouteImport } from './routes/admin/pedidos'
 import { Route as CheckoutIdRouteImport } from './routes/checkout.$id'
+import { Route as CompraCanceladaRouteImport } from './routes/compra/cancelada'
 import { Route as CompraSucessoRouteImport } from './routes/compra/sucesso'
 import { Route as ContasIndexRouteImport } from './routes/contas/index'
 import { Route as ContasIdRouteImport } from './routes/contas/$id'
@@ -27,6 +28,7 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardPerfilRouteImport } from './routes/dashboard/perfil'
 import { Route as AdminContasIndexRouteImport } from './routes/admin/contas/index'
 import { Route as AdminContasNovaRouteImport } from './routes/admin/contas/nova'
+import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 import { Route as DashboardComprasIndexRouteImport } from './routes/dashboard/compras/index'
 import { Route as DashboardComprasIdRouteImport } from './routes/dashboard/compras/$id'
 import { Route as AdminContasIdEditarRouteImport } from './routes/admin/contas/$id.editar'
@@ -86,6 +88,11 @@ const CheckoutIdRoute = CheckoutIdRouteImport.update({
   path: '/checkout/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompraCanceladaRoute = CompraCanceladaRouteImport.update({
+  id: '/compra/cancelada',
+  path: '/compra/cancelada',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompraSucessoRoute = CompraSucessoRouteImport.update({
   id: '/compra/sucesso',
   path: '/compra/sucesso',
@@ -121,6 +128,11 @@ const AdminContasNovaRoute = AdminContasNovaRouteImport.update({
   path: '/contas/nova',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
+  id: '/api/stripe/webhook',
+  path: '/api/stripe/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardComprasIndexRoute = DashboardComprasIndexRouteImport.update({
   id: '/compras/',
   path: '/compras/',
@@ -148,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/checkout/$id': typeof CheckoutIdRoute
+  '/compra/cancelada': typeof CompraCanceladaRoute
   '/compra/sucesso': typeof CompraSucessoRoute
   '/contas/$id': typeof ContasIdRoute
   '/dashboard/perfil': typeof DashboardPerfilRoute
@@ -155,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/contas/': typeof ContasIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/admin/contas/nova': typeof AdminContasNovaRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/dashboard/compras/$id': typeof DashboardComprasIdRoute
   '/admin/contas/': typeof AdminContasIndexRoute
   '/dashboard/compras/': typeof DashboardComprasIndexRoute
@@ -169,6 +183,7 @@ export interface FileRoutesByTo {
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/checkout/$id': typeof CheckoutIdRoute
+  '/compra/cancelada': typeof CompraCanceladaRoute
   '/compra/sucesso': typeof CompraSucessoRoute
   '/contas/$id': typeof ContasIdRoute
   '/dashboard/perfil': typeof DashboardPerfilRoute
@@ -176,6 +191,7 @@ export interface FileRoutesByTo {
   '/contas': typeof ContasIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/admin/contas/nova': typeof AdminContasNovaRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/dashboard/compras/$id': typeof DashboardComprasIdRoute
   '/admin/contas': typeof AdminContasIndexRoute
   '/dashboard/compras': typeof DashboardComprasIndexRoute
@@ -193,6 +209,7 @@ export interface FileRoutesById {
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/checkout/$id': typeof CheckoutIdRoute
+  '/compra/cancelada': typeof CompraCanceladaRoute
   '/compra/sucesso': typeof CompraSucessoRoute
   '/contas/$id': typeof ContasIdRoute
   '/dashboard/perfil': typeof DashboardPerfilRoute
@@ -200,6 +217,7 @@ export interface FileRoutesById {
   '/contas/': typeof ContasIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/admin/contas/nova': typeof AdminContasNovaRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/dashboard/compras/$id': typeof DashboardComprasIdRoute
   '/admin/contas/': typeof AdminContasIndexRoute
   '/dashboard/compras/': typeof DashboardComprasIndexRoute
@@ -218,6 +236,7 @@ export interface FileRouteTypes {
     | '/admin/clientes'
     | '/admin/pedidos'
     | '/checkout/$id'
+    | '/compra/cancelada'
     | '/compra/sucesso'
     | '/contas/$id'
     | '/dashboard/perfil'
@@ -225,6 +244,7 @@ export interface FileRouteTypes {
     | '/contas/'
     | '/dashboard/'
     | '/admin/contas/nova'
+    | '/api/stripe/webhook'
     | '/dashboard/compras/$id'
     | '/admin/contas/'
     | '/dashboard/compras/'
@@ -239,6 +259,7 @@ export interface FileRouteTypes {
     | '/admin/clientes'
     | '/admin/pedidos'
     | '/checkout/$id'
+    | '/compra/cancelada'
     | '/compra/sucesso'
     | '/contas/$id'
     | '/dashboard/perfil'
@@ -246,6 +267,7 @@ export interface FileRouteTypes {
     | '/contas'
     | '/dashboard'
     | '/admin/contas/nova'
+    | '/api/stripe/webhook'
     | '/dashboard/compras/$id'
     | '/admin/contas'
     | '/dashboard/compras'
@@ -262,6 +284,7 @@ export interface FileRouteTypes {
     | '/admin/clientes'
     | '/admin/pedidos'
     | '/checkout/$id'
+    | '/compra/cancelada'
     | '/compra/sucesso'
     | '/contas/$id'
     | '/dashboard/perfil'
@@ -269,6 +292,7 @@ export interface FileRouteTypes {
     | '/contas/'
     | '/dashboard/'
     | '/admin/contas/nova'
+    | '/api/stripe/webhook'
     | '/dashboard/compras/$id'
     | '/admin/contas/'
     | '/dashboard/compras/'
@@ -284,9 +308,11 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   SuporteRoute: typeof SuporteRoute
   CheckoutIdRoute: typeof CheckoutIdRoute
+  CompraCanceladaRoute: typeof CompraCanceladaRoute
   CompraSucessoRoute: typeof CompraSucessoRoute
   ContasIdRoute: typeof ContasIdRoute
   ContasIndexRoute: typeof ContasIndexRoute
+  ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -368,6 +394,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compra/cancelada': {
+      id: '/compra/cancelada'
+      path: '/compra/cancelada'
+      fullPath: '/compra/cancelada'
+      preLoaderRoute: typeof CompraCanceladaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/compra/sucesso': {
       id: '/compra/sucesso'
       path: '/compra/sucesso'
@@ -416,6 +449,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/contas/nova'
       preLoaderRoute: typeof AdminContasNovaRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/api/stripe/webhook': {
+      id: '/api/stripe/webhook'
+      path: '/api/stripe/webhook'
+      fullPath: '/api/stripe/webhook'
+      preLoaderRoute: typeof ApiStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/dashboard/compras/': {
       id: '/dashboard/compras/'
@@ -490,9 +530,11 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   SuporteRoute: SuporteRoute,
   CheckoutIdRoute: CheckoutIdRoute,
+  CompraCanceladaRoute: CompraCanceladaRoute,
   CompraSucessoRoute: CompraSucessoRoute,
   ContasIdRoute: ContasIdRoute,
   ContasIndexRoute: ContasIndexRoute,
+  ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

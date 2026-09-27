@@ -1,9 +1,10 @@
 import * as React from "react";
-import { createFileRoute, Link, notFound, redirect, useNavigate } from "@tanstack/react-router";
-import { Loader2, Lock, ShieldCheck } from "lucide-react";
+import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
+import { Clock, CreditCard, Loader2, Lock, ShieldCheck } from "lucide-react";
 import { StoreLayout } from "@/components/store/store-layout";
 import { Button } from "@/components/ui/button";
-import { Field, Input } from "@/components/ui/field";
+import { FormError } from "@/components/ui/form-error";
+import { startCheckoutFn } from "@/functions/checkout";
 import { getPublicAccountFn } from "@/functions/catalog";
 import { centsToEuros } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/checkout/$id")({
     if (!context.user) {
       throw redirect({ to: "/login", search: { redirect: location.href } });
     }
+    return { user: context.user };
   },
   loader: async ({ params }) => {
     const account = await getPublicAccountFn({ data: { id: params.id } });
@@ -21,28 +23,35 @@ export const Route = createFileRoute("/checkout/$id")({
     return { account };
   },
   head: () => ({
-    meta: [
-      { title: "Checkout | Plutão Shop" },
-      { name: "description", content: "Reveja o resumo do pedido antes de finalizar a compra." },
-      { property: "og:title", content: "Checkout | Plutão Shop" },
-      { property: "og:description", content: "Resumo do pedido na Plutão Shop." },
-    ],
+    meta: [{ title: "Finalizar compra | Plutão Shop" }, { name: "robots", content: "noindex" }],
   }),
   component: Checkout,
 });
 
 function Checkout() {
   const { account } = Route.useLoaderData();
-  const navigate = useNavigate();
+  const { user } = Route.useRouteContext();
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const available = account.status === "AVAILABLE";
+  const price = formatPrice(centsToEuros(account.priceCents));
 
-  const submit = (event: React.FormEvent) => {
-    event.preventDefault();
+  const pay = async () => {
     setLoading(true);
-    setTimeout(() => {
-      navigate({ to: "/compra/sucesso" });
-    }, 2000);
+    setError(null);
+    try {
+      const result = await startCheckoutFn({ data: { accountId: account.id } });
+      if (!result.ok) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
+      // Página de pagamento segura do Stripe (os dados do cartão nunca passam por nós).
+      window.location.assign(result.url);
+    } catch {
+      setError("Não foi possível iniciar o pagamento. Tente novamente.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,34 +59,14 @@ function Checkout() {
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
         <h1 className="font-display text-3xl font-extrabold">Finalizar compra</h1>
         <p className="mt-2 text-muted-foreground">
-          Fluxo de demonstração — nenhum pagamento real é processado.
+          Reveja o pedido. O pagamento é feito na página segura do Stripe.
         </p>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1.2fr_1fr]">
-          <form onSubmit={submit} className="surface-panel space-y-5 p-6">
-            <h2 className="font-bold">Dados de faturação</h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Nome" htmlFor="nome">
-                <Input id="nome" placeholder="João Martins" required />
-              </Field>
-              <Field label="Email" htmlFor="email">
-                <Input id="email" type="email" placeholder="joao@example.test" required />
-              </Field>
-            </div>
-            <Field label="País" htmlFor="pais">
-              <Input id="pais" placeholder="Portugal" />
-            </Field>
+          <section className="surface-panel space-y-5 p-6">
+            <h2 className="font-bold">Pagamento</h2>
 
-            <div className="rounded-xl border border-border bg-surface/50 p-4 text-sm text-muted-foreground">
-              <p className="flex items-center gap-2 font-semibold text-foreground">
-                <Lock className="size-4 text-primary" /> Pagamento simulado
-              </p>
-              <p className="mt-1.5">
-                Não são pedidos dados de cartão. Ao continuar, a compra é simulada apenas
-                visualmente.
-              </p>
-            </div>
-
+            {error ? <FormError message={error} /> : null}
             {!available ? (
               <p className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2.5 text-sm text-warning">
                 {account.status === "SOLD"
@@ -85,53 +74,78 @@ function Checkout() {
                   : "Esta conta está reservada por outro cliente. Tente dentro de alguns minutos."}
               </p>
             ) : null}
-            <Button type="submit" size="lg" className="w-full" disabled={loading || !available}>
+
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li className="flex gap-3">
+                <CreditCard className="mt-0.5 size-4 shrink-0 text-primary" />
+                Cartão de crédito/débito, Apple Pay ou Google Pay, processados pelo Stripe.
+              </li>
+              <li className="flex gap-3">
+                <Clock className="mt-0.5 size-4 shrink-0 text-primary" />
+                Ao continuar, a conta fica reservada para si durante 30 minutos.
+              </li>
+              <li className="flex gap-3">
+                <Lock className="mt-0.5 size-4 shrink-0 text-primary" />A Plutão Shop nunca vê nem
+                guarda os dados do seu cartão.
+              </li>
+            </ul>
+
+            <p className="text-sm text-muted-foreground">
+              Comprador: <span className="font-semibold text-foreground">{user.email}</span>
+            </p>
+
+            <Button
+              type="button"
+              size="lg"
+              className="w-full"
+              disabled={loading || !available}
+              onClick={() => void pay()}
+            >
               {loading ? (
                 <>
-                  <Loader2 className="size-4 animate-spin" /> A processar...
+                  <Loader2 className="size-4 animate-spin" /> A abrir o pagamento...
                 </>
               ) : (
-                "Continuar para pagamento"
+                `Pagar ${price} com Stripe`
               )}
             </Button>
-          </form>
+          </section>
 
           <aside className="surface-panel h-fit p-6">
             <h2 className="font-bold">Resumo do pedido</h2>
             <div className="mt-5 flex gap-4">
-              <img
-                src={account.images[0]?.thumbUrl}
-                alt={account.title}
-                loading="lazy"
-                width={1024}
-                height={640}
-                className="size-20 rounded-lg object-cover"
-              />
+              {account.images[0] ? (
+                <img
+                  src={account.images[0].thumbUrl}
+                  alt={account.title}
+                  loading="lazy"
+                  className="size-20 rounded-lg object-cover"
+                />
+              ) : null}
               <div>
                 <p className="font-semibold">{account.title}</p>
                 <p className="text-xs text-muted-foreground">
                   Nível {account.level} · {account.server}
                 </p>
-                <p className="mt-1 text-sm font-bold">
-                  {formatPrice(centsToEuros(account.priceCents))}
-                </p>
+                <p className="mt-1 text-sm font-bold">{price}</p>
               </div>
             </div>
 
             <dl className="mt-6 space-y-2 border-t border-border pt-5 text-sm">
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Subtotal</dt>
-                <dd>{formatPrice(centsToEuros(account.priceCents))}</dd>
+                <dd>{price}</dd>
               </div>
               <div className="flex justify-between border-t border-border pt-3 text-base font-bold">
                 <dt>Total</dt>
-                <dd className="gold-text">{formatPrice(centsToEuros(account.priceCents))}</dd>
+                <dd className="gold-text">{price}</dd>
               </div>
             </dl>
 
             <p className="mt-5 flex items-start gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
-              Os dados da conta ficam disponíveis na sua área de cliente após a confirmação.
+              Os dados da conta ficam disponíveis na sua área de cliente após a confirmação do
+              pagamento.
             </p>
 
             <Button asChild variant="ghost" className="mt-4 w-full">

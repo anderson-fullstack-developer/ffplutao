@@ -54,21 +54,23 @@
 
 **Teste:** criar uma conta no admin e ela aparece no catálogo.
 
-## Fase 5 — Compra com Stripe (fase mais crítica)
-- [ ] 20. Conta Stripe em modo teste + chaves; confirmar que o Stripe aceita este tipo de negócio — *utilizador*
-- [ ] 21. "Comprar agora":
+## Fase 5 — Compra com Stripe (fase mais crítica) ✅
+- [x] 20. Chaves Stripe (LIVE, por decisão do utilizador) + Stripe CLI instalado. ⚠️ Confirmar com o Stripe que aceita este tipo de negócio — *utilizador*
+- [x] 21. "Comprar agora" (`src/server/payments/checkout.ts`):
   1. o servidor valida (conta existe, está `AVAILABLE`, preço vem da base de dados)
-  2. reserva a conta de forma atómica durante 30 min (mínimo exigido pelo Stripe Checkout)
+  2. reserva a conta de forma atómica (`SELECT … FOR UPDATE`): sessão Stripe 31 min + 5 min de margem; 1 checkout ativo por cliente; clicar outra vez reutiliza a mesma sessão
   3. cria a order `PENDING`
   4. cria a sessão do Stripe Checkout
-- [ ] 22. Webhook do Stripe:
+- [x] 22. Webhook `POST /api/stripe/webhook` (`src/server/payments/webhook.ts`):
   - valida a assinatura
   - é idempotente (tabela `stripe_events`)
   - marca a order `PAID` e a conta `SOLD` numa transação
-- [ ] 23. Reservas expiradas → `AVAILABLE`; pagamento que chegue tarde → reembolso automático
-- [ ] 24. `/compra/sucesso` mostra "A confirmar pagamento…" até o webhook confirmar
+- [x] 23. Reservas expiradas → `AVAILABLE` (webhook `checkout.session.expired` ou no checkout seguinte, que expira a sessão antiga no Stripe); pagamento que chegue tarde → reembolso automático (se o reembolso falhar, o pedido fica `FAILED` para o admin tratar); reembolso feito no painel → `REFUNDED`
+- [x] 24. `/compra/sucesso` mostra "A confirmar pagamento…" e pergunta ao servidor, que confirma com o Stripe (webhook ou consulta servidor→Stripe com a chave secreta — nunca pelo redirect); `/compra/cancelada` expira a sessão e liberta a conta
 
-**Teste:** comprar com o cartão `4242 4242 4242 4242`; duas pessoas a tentar a mesma conta ao mesmo tempo → só uma consegue.
+**Verificado:** 34 testes com a API real do Stripe (sessões criadas/expiradas, sem cobranças) + webhooks assinados: assinatura errada, evento duplicado, sessão trocada, pagamento tardio, cancelamento, expiração, reembolso, e **6 clientes em simultâneo → só 1 reserva**.
+
+**Falta (antes do lançamento):** uma compra real de ponta a ponta com cartão; em produção criar o endpoint do webhook no painel Stripe (eventos: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired`, `charge.refunded`) e pôr o `whsec_` na Vercel. Localmente o `STRIPE_WEBHOOK_SECRET` é um segredo de desenvolvimento.
 
 ## Fase 6 — Entrega das credenciais
 - [ ] 25. "Minhas Compras" mostra só os pedidos do próprio utilizador
@@ -91,8 +93,8 @@
 
 ## Ajustes de interface (feitos ao ligar cada fase)
 - [x] Formulário do admin: trocar "Status: Disponível/Reservada/Vendida" por **Rascunho / Publicada / Desativada** (Fase 4)
-- [ ] Checkout: remover os campos nome/email/país; deixar só o resumo e o botão **"Pagar com Stripe"** (Fase 5)
-- [ ] `/compra/sucesso`: estado **"A confirmar pagamento…"** antes de "Compra concluída" (Fase 5)
+- [x] Checkout: remover os campos nome/email/país; deixar só o resumo e o botão **"Pagar com Stripe"** (Fase 5)
+- [x] `/compra/sucesso`: estado **"A confirmar pagamento…"** antes de "Compra concluída" (Fase 5)
 - [x] Badges: acrescentar **Rascunho**, **Desativada**, **Falhado** (Fase 3)
 - [x] Remover o botão "Continuar com Google" do login, até haver decisão sobre login social (Fase 2)
 - [ ] Tirar `credentials` do tipo `Order` do frontend (Fase 6)
