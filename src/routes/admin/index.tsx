@@ -33,7 +33,10 @@ function AdminDashboard() {
         <h2 className="font-bold">Vendas nos últimos 30 dias</h2>
         <div className="mt-6 flex h-52 items-end gap-2">
           {salesChart.map((point) => (
-            <div key={point.day} className="flex h-full flex-1 flex-col items-center justify-end gap-2">
+            <div
+              key={point.day}
+              className="flex h-full flex-1 flex-col items-center justify-end gap-2"
+            >
               <div
                 className="gold-surface w-full rounded-t-md transition-all hover:brightness-110"
                 style={{ height: `${Math.max((point.value / max) * 92, 4)}%` }}

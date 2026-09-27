@@ -7,7 +7,10 @@ const map: Record<string, { label: string; className: string }> = {
   vendida: { label: "Vendida", className: "bg-muted text-muted-foreground border-border" },
   pago: { label: "Pago", className: "bg-success/15 text-success border-success/30" },
   pendente: { label: "Pendente", className: "bg-warning/15 text-warning border-warning/30" },
-  cancelado: { label: "Cancelado", className: "bg-destructive/15 text-destructive border-destructive/30" },
+  cancelado: {
+    label: "Cancelado",
+    className: "bg-destructive/15 text-destructive border-destructive/30",
+  },
   reembolsado: { label: "Reembolsado", className: "bg-muted text-muted-foreground border-border" },
   ativo: { label: "Ativo", className: "bg-success/15 text-success border-success/30" },
   inativo: { label: "Inativo", className: "bg-muted text-muted-foreground border-border" },

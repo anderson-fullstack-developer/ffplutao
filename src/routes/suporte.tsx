@@ -47,9 +47,7 @@ function Suporte() {
     <StoreLayout>
       <div className="ember-bg border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-          <h1 className="font-display text-3xl font-extrabold sm:text-4xl">
-            Como podemos ajudar?
-          </h1>
+          <h1 className="font-display text-3xl font-extrabold sm:text-4xl">Como podemos ajudar?</h1>
           <p className="mt-2 max-w-xl text-muted-foreground">
             Escolha um assunto e envie a sua mensagem. Respondemos o mais rápido possível.
           </p>

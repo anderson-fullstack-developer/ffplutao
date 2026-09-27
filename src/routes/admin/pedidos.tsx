@@ -62,16 +62,7 @@ function AdminPedidos() {
       </div>
 
       <DataTable
-        headers={[
-          "Pedido",
-          "Cliente",
-          "Produto",
-          "Valor",
-          "Pagamento",
-          "Status",
-          "Data",
-          "Ações",
-        ]}
+        headers={["Pedido", "Cliente", "Produto", "Valor", "Pagamento", "Status", "Data", "Ações"]}
       >
         {rows.map((order) => (
           <tr key={order.id} className="transition-colors hover:bg-surface-2/30">

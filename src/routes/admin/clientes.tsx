@@ -77,7 +77,10 @@ function AdminClientes() {
               {selectedOrders.length ? (
                 <ul className="divide-y divide-border/70 rounded-lg border border-border">
                   {selectedOrders.map((order) => (
-                    <li key={order.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+                    <li
+                      key={order.id}
+                      className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
+                    >
                       <span className="font-semibold">{order.reference}</span>
                       <span className="text-muted-foreground">{order.accountTitle}</span>
                       <StatusBadge status={order.status} />

@@ -36,7 +36,12 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-const heroPills = ["Compra simples", "Entrega digital", "Suporte ao cliente", "Catálogo atualizado"];
+const heroPills = [
+  "Compra simples",
+  "Entrega digital",
+  "Suporte ao cliente",
+  "Catálogo atualizado",
+];
 
 const steps = [
   {

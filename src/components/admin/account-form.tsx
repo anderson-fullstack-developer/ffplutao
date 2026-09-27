@@ -10,7 +10,9 @@ import type { Account } from "@/types";
 export function AccountForm({ account }: { account?: Account }) {
   const navigate = useNavigate();
   const [saving, setSaving] = React.useState(false);
-  const [images, setImages] = React.useState<string[]>(account?.images ?? accountImages.slice(0, 3));
+  const [images, setImages] = React.useState<string[]>(
+    account?.images ?? accountImages.slice(0, 3),
+  );
 
   const publish = (event: React.FormEvent) => {
     event.preventDefault();
@@ -58,7 +60,13 @@ export function AccountForm({ account }: { account?: Account }) {
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Preço (€)" htmlFor="f-preco">
-            <Input id="f-preco" type="number" step="0.01" defaultValue={account?.price} placeholder="69.90" />
+            <Input
+              id="f-preco"
+              type="number"
+              step="0.01"
+              defaultValue={account?.price}
+              placeholder="69.90"
+            />
           </Field>
           <Field label="Level" htmlFor="f-level">
             <Input id="f-level" type="number" defaultValue={account?.level} placeholder="74" />
@@ -130,7 +138,10 @@ export function AccountForm({ account }: { account?: Account }) {
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {images.map((image, index) => (
-            <div key={`${image}-${index}`} className="group relative overflow-hidden rounded-lg border border-border">
+            <div
+              key={`${image}-${index}`}
+              className="group relative overflow-hidden rounded-lg border border-border"
+            >
               <img
                 src={image}
                 alt={`Screenshot ${index + 1}`}
@@ -187,11 +198,7 @@ export function AccountForm({ account }: { account?: Account }) {
         <Button type="button" variant="ghost" onClick={() => navigate({ to: "/admin/contas" })}>
           Cancelar
         </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => toast.success("Rascunho salvo")}
-        >
+        <Button type="button" variant="secondary" onClick={() => toast.success("Rascunho salvo")}>
           Salvar rascunho
         </Button>
         <Button type="submit" disabled={saving}>

@@ -4,11 +4,12 @@ import { cn } from "@/lib/format";
 const base =
   "w-full rounded-lg border border-input bg-surface/70 px-4 text-sm text-foreground placeholder:text-muted-foreground/70 transition-colors focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-ring/25";
 
-export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
-  ({ className, ...props }, ref) => (
-    <input ref={ref} className={cn(base, "h-11", className)} {...props} />
-  ),
-);
+export const Input = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>(({ className, ...props }, ref) => (
+  <input ref={ref} className={cn(base, "h-11", className)} {...props} />
+));
 Input.displayName = "Input";
 
 export const Textarea = React.forwardRef<
@@ -30,7 +31,10 @@ Select.displayName = "Select";
 export function Label({ className, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) {
   return (
     <label
-      className={cn("mb-2 block text-xs font-semibold tracking-wide text-muted-foreground uppercase", className)}
+      className={cn(
+        "mb-2 block text-xs font-semibold tracking-wide text-muted-foreground uppercase",
+        className,
+      )}
       {...props}
     />
   );
@@ -82,9 +86,7 @@ export function FormSection({
         {icon ? <span className="mt-0.5 text-primary">{icon}</span> : null}
         <div>
           <h3 className="text-base font-bold text-foreground">{title}</h3>
-          {description ? (
-            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-          ) : null}
+          {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
         </div>
       </header>
       <div className="grid gap-4">{children}</div>

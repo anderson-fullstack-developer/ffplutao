@@ -31,7 +31,11 @@ export function AccountCard({ account }: { account: Account }) {
 
         <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
           <Spec icon={<Globe2 className="size-4" />} label="Servidor" value={account.server} />
-          <Spec icon={<Gamepad2 className="size-4" />} label="Nível" value={String(account.level)} />
+          <Spec
+            icon={<Gamepad2 className="size-4" />}
+            label="Nível"
+            value={String(account.level)}
+          />
           <Spec icon={<Sparkles className="size-4" />} label="Skins" value={`${account.skins}+`} />
           <Spec
             icon={<Swords className="size-4" />}
