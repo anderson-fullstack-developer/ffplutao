@@ -18,6 +18,7 @@ import {
   listCustomers,
 } from "@/server/admin/reports";
 import { requireAdmin } from "@/server/auth/guards";
+import { refundFailedOrder } from "@/server/payments/checkout";
 
 // TODAS as funções começam por requireAdmin(): a proteção da rota /admin é só interface.
 
@@ -110,4 +111,13 @@ export const listCustomerOrdersFn = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     await requireAdmin();
     return listCustomerOrders(data.id);
+  });
+
+/** Devolve o dinheiro de um pedido pago que não pôde ser entregue. */
+export const refundOrderFn = createServerFn({ method: "POST" })
+  .validator((data: { orderId: string }) => z.object({ orderId: z.string().uuid() }).parse(data))
+  .handler(async ({ data }) => {
+    const admin = await requireAdmin();
+    console.info(`[admin] ${admin.email} pediu reembolso do pedido ${data.orderId}`);
+    return refundFailedOrder(data.orderId);
   });

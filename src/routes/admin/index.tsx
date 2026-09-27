@@ -98,7 +98,7 @@ function AdminDashboard() {
           <EmptyState
             icon={<ReceiptText className="size-6" />}
             title="Ainda não há pedidos."
-            description="Os pedidos aparecem aqui quando os pagamentos estiverem ativos (Fase 5)."
+            description="Os pedidos aparecem aqui assim que os clientes começarem a comprar."
           />
         ) : (
           <DataTable headers={["Pedido", "Cliente", "Conta", "Valor", "Estado", "Data"]}>

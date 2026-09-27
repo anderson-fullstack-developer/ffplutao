@@ -26,11 +26,14 @@ cloudinary.config({
 });
 
 const svg = readFileSync(resolve("src/assets/brand/icon.svg"));
-const result = await cloudinary.uploader.upload(`data:image/svg+xml;base64,${svg.toString("base64")}`, {
-  public_id: BRAND_ICON_PUBLIC_ID,
-  overwrite: true,
-  invalidate: true,
-  format: "png",
-  resource_type: "image",
-});
+const result = await cloudinary.uploader.upload(
+  `data:image/svg+xml;base64,${svg.toString("base64")}`,
+  {
+    public_id: BRAND_ICON_PUBLIC_ID,
+    overwrite: true,
+    invalidate: true,
+    format: "png",
+    resource_type: "image",
+  },
+);
 console.log(`✔ Ícone enviado: ${result.secure_url} (${result.width}x${result.height})`);

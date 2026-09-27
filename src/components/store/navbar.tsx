@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { LogOut, Menu, ShoppingBag, Shield, User, LifeBuoy, X } from "lucide-react";
+import { LogOut, Menu, ShoppingBag, User, LifeBuoy, X } from "lucide-react";
 import { Logo } from "@/components/store/logo";
 import { Button } from "@/components/ui/button";
 import { initialsOf, useSession } from "@/lib/session";
@@ -66,11 +66,6 @@ export function Navbar() {
                   sideOffset={8}
                   className="surface-panel z-50 w-52 p-1.5 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:zoom-in-95"
                 >
-                  {user.role === "ADMIN" ? (
-                    <DropdownItem to="/admin" icon={<Shield className="size-4" />}>
-                      Painel admin
-                    </DropdownItem>
-                  ) : null}
                   <DropdownItem to="/dashboard/perfil" icon={<User className="size-4" />}>
                     Minha conta
                   </DropdownItem>

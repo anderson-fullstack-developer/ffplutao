@@ -1,5 +1,6 @@
 import * as React from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { ReceiptText, Search } from "lucide-react";
 import { z } from "zod";
 import { AdminShell, DataTable } from "@/components/admin/admin-shell";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Modal } from "@/components/ui/confirm-modal";
 import { EmptyState } from "@/components/ui/misc";
-import { listAdminOrdersFn } from "@/functions/admin";
+import { listAdminOrdersFn, refundOrderFn } from "@/functions/admin";
 import type { AdminOrderRow, OrderStatus } from "@/lib/admin";
 import { centsToEuros } from "@/lib/catalog";
 import { formatDate, formatPrice } from "@/lib/format";
@@ -34,6 +35,27 @@ function AdminPedidos() {
   const navigate = Route.useNavigate();
   const [query, setQuery] = React.useState(search.q ?? "");
   const [selected, setSelected] = React.useState<AdminOrderRow | null>(null);
+  const [refunding, setRefunding] = React.useState(false);
+  const router = useRouter();
+
+  const refund = async (orderId: string) => {
+    if (!window.confirm("Devolver o valor total deste pedido ao cliente?")) return;
+    setRefunding(true);
+    try {
+      const result = await refundOrderFn({ data: { orderId } });
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Dinheiro devolvido ao cliente");
+      setSelected(null);
+      await router.invalidate();
+    } catch {
+      toast.error("Não foi possível devolver o dinheiro. Tente novamente.");
+    } finally {
+      setRefunding(false);
+    }
+  };
 
   React.useEffect(() => {
     const value = query.trim();
@@ -142,15 +164,48 @@ function AdminPedidos() {
             />
             <Row label="Valor" value={formatPrice(centsToEuros(selected.amountCents))} />
             <Row label="Criado" value={formatDate(selected.createdAt)} />
+            <Row label="Pagamento" value="Cartão" />
             <Row label="Pago" value={selected.paidAt ? formatDate(selected.paidAt) : "—"} />
-            <Row label="Stripe (checkout)" value={selected.stripeCheckoutSessionId ?? "—"} mono />
-            <Row label="Stripe (pagamento)" value={selected.stripePaymentIntentId ?? "—"} mono />
+            {selected.refundedAt ? (
+              <Row label="Devolvido" value={formatDate(selected.refundedAt)} />
+            ) : null}
           </dl>
+        ) : null}
+        {selected ? (
+          <div
+            className={
+              selected.status === "FAILED"
+                ? "mt-4 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm"
+                : "mt-4 rounded-lg border border-border bg-surface/50 p-3 text-sm text-muted-foreground"
+            }
+          >
+            <p>{STATUS_HELP[selected.status]}</p>
+            {selected.canRefund ? (
+              <Button
+                className="mt-3"
+                variant="destructive"
+                disabled={refunding}
+                onClick={() => void refund(selected.id)}
+              >
+                {refunding ? "A devolver..." : "Devolver o dinheiro ao cliente"}
+              </Button>
+            ) : null}
+          </div>
         ) : null}
       </Modal>
     </AdminShell>
   );
 }
+
+const STATUS_HELP: Record<OrderStatus, string> = {
+  PENDING:
+    "O cliente está na página de pagamento. Se não pagar em 30 minutos, o pedido é cancelado sozinho e a conta volta à loja.",
+  PAID: "Pago. O cliente já tem acesso aos dados da conta na área de cliente.",
+  CANCELLED: "O cliente não concluiu o pagamento. Nada foi cobrado.",
+  FAILED:
+    "O cliente pagou, mas a conta já tinha sido vendida a outra pessoa, e a devolução automática não funcionou. Devolva o dinheiro ao cliente.",
+  REFUNDED: "O dinheiro foi devolvido ao cartão do cliente (pode demorar alguns dias a aparecer).",
+};
 
 function Row({ label, value, mono }: { label: string; value: React.ReactNode; mono?: boolean }) {
   return (

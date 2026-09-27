@@ -6,7 +6,7 @@ import { Logo } from "@/components/store/logo";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { FormError } from "@/components/ui/form-error";
-import { loginFn } from "@/functions/auth";
+import { getCurrentUserFn, loginFn } from "@/functions/auth";
 import { safeRedirectPath } from "@/lib/auth-schemas";
 import { useRefreshSession } from "@/lib/session";
 
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/login")({
   validateSearch: z.object({ redirect: z.string().optional() }),
   beforeLoad: ({ context, search }) => {
     if (context.user) {
-      throw redirect({ href: safeRedirectPath(search.redirect) });
+      throw redirect({ href: homeFor(context.user.role, search.redirect) });
     }
   },
   head: () => ({
@@ -27,6 +27,11 @@ export const Route = createFileRoute("/login")({
   }),
   component: Login,
 });
+
+function homeFor(role: string | undefined, redirectTo: string | undefined) {
+  if (redirectTo) return safeRedirectPath(redirectTo);
+  return role === "ADMIN" ? "/admin" : "/dashboard";
+}
 
 function Login() {
   const search = Route.useSearch();
@@ -56,7 +61,9 @@ function Login() {
         return;
       }
       await refreshSession();
-      await router.navigate({ href: safeRedirectPath(search.redirect) });
+      // Admin vai direto para o painel; clientes para a área de cliente (ou de onde vieram).
+      const me = await getCurrentUserFn();
+      await router.navigate({ href: homeFor(me?.role, search.redirect) });
     } catch {
       setError("Não foi possível entrar. Tente novamente.");
     } finally {

@@ -406,6 +406,45 @@ export async function markOrderPaid(session: Stripe.Checkout.Session): Promise<F
   return "refunded";
 }
 
+/**
+ * Admin: devolve o dinheiro de um pedido pago que não pôde ser entregue (FAILED).
+ * Só para pedidos FAILED com pagamento — pedidos PAGOS já entregaram as credenciais.
+ */
+export async function refundFailedOrder(
+  orderId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!UUID.test(orderId)) return { ok: false, error: "Pedido não encontrado." };
+  const [order] = await getDb()
+    .select({ status: orders.status, pi: orders.stripePaymentIntentId })
+    .from(orders)
+    .where(eq(orders.id, orderId));
+  if (!order) return { ok: false, error: "Pedido não encontrado." };
+  if (order.status === "REFUNDED") return { ok: true };
+  if (order.status !== "FAILED" || !order.pi) {
+    return { ok: false, error: "Este pedido não tem nenhum pagamento por devolver." };
+  }
+  try {
+    await getStripe().refunds.create(
+      { payment_intent: order.pi, reason: "requested_by_customer" },
+      { idempotencyKey: `refund-${orderId}` },
+    );
+  } catch (error) {
+    const code = (error as { code?: string })?.code;
+    if (code !== "charge_already_refunded") {
+      console.error(`[stripe] reembolso manual falhou (pedido ${orderId})`, error);
+      return {
+        ok: false,
+        error: "Não foi possível devolver o dinheiro agora. Tente novamente mais tarde.",
+      };
+    }
+  }
+  await getDb()
+    .update(orders)
+    .set({ status: "REFUNDED", refundedAt: new Date() })
+    .where(eq(orders.id, orderId));
+  return { ok: true };
+}
+
 /** Sessão expirada / pagamento assíncrono falhado → liberta a reserva. */
 export async function markSessionClosed(
   session: Stripe.Checkout.Session,

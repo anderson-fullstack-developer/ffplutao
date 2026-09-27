@@ -145,10 +145,11 @@ export interface AdminOrderRow {
   accountTitle: string;
   amountCents: number;
   status: OrderStatus;
-  stripeCheckoutSessionId: string | null;
-  stripePaymentIntentId: string | null;
+  /** Pago mas não entregue (FAILED com pagamento) → o admin pode devolver o dinheiro. */
+  canRefund: boolean;
   createdAt: string;
   paidAt: string | null;
+  refundedAt: string | null;
 }
 
 export interface AdminCustomerRow {

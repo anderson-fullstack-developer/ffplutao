@@ -24,10 +24,10 @@ async function selectOrders(where: SQL | undefined, limit: number): Promise<Admi
       accountTitle: accounts.title,
       amountCents: orders.amountCents,
       status: orders.status,
-      stripeCheckoutSessionId: orders.stripeCheckoutSessionId,
-      stripePaymentIntentId: orders.stripePaymentIntentId,
+      paymentIntent: orders.stripePaymentIntentId,
       createdAt: orders.createdAt,
       paidAt: orders.paidAt,
+      refundedAt: orders.refundedAt,
     })
     .from(orders)
     .innerJoin(users, eq(orders.userId, users.id))
@@ -36,11 +36,14 @@ async function selectOrders(where: SQL | undefined, limit: number): Promise<Admi
     .orderBy(desc(orders.createdAt))
     .limit(limit);
 
-  return rows.map(({ number, ...row }) => ({
+  // As referências do processador de pagamentos ficam no servidor (o admin não precisa delas).
+  return rows.map(({ number, paymentIntent, ...row }) => ({
     ...row,
     reference: orderReference(number),
+    canRefund: row.status === "FAILED" && paymentIntent !== null,
     createdAt: row.createdAt.toISOString(),
     paidAt: row.paidAt?.toISOString() ?? null,
+    refundedAt: row.refundedAt?.toISOString() ?? null,
   }));
 }
 
