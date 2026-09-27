@@ -20,6 +20,8 @@ const map: Record<string, { label: string; className: string }> = {
   OPEN: { label: "Aberto", className: warning },
   IN_PROGRESS: { label: "Em andamento", className: warning },
   CLOSED: { label: "Fechado", className: muted },
+  USER: { label: "Cliente", className: muted },
+  ADMIN: { label: "Admin", className: "bg-primary/15 text-primary border-primary/30" },
   // Estados dos dados de demonstração (removidos nas próximas fases)
   disponivel: { label: "Disponível", className: "bg-success/15 text-success border-success/30" },
   reservada: { label: "Reservada", className: "bg-warning/15 text-warning border-warning/30" },

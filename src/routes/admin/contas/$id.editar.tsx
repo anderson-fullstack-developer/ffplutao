@@ -1,20 +1,18 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AccountForm } from "@/components/admin/account-form";
-import { getAccount } from "@/mock/accounts";
+import { getAdminAccountFn } from "@/functions/admin";
 
 export const Route = createFileRoute("/admin/contas/$id/editar")({
-  loader: ({ params }) => {
-    const account = getAccount(params.id);
+  loader: async ({ params }) => {
+    const account = await getAdminAccountFn({ data: { id: params.id } });
     if (!account) throw notFound();
     return { account };
   },
   head: ({ loaderData }) => ({
     meta: [
       { title: `Editar ${loaderData?.account.title ?? "conta"} | Plutão Shop` },
-      { name: "description", content: "Edite os detalhes de uma conta publicada." },
-      { property: "og:title", content: "Editar conta | Plutão Shop" },
-      { property: "og:description", content: "Formulário de edição de contas." },
+      { name: "robots", content: "noindex" },
     ],
   }),
   component: EditarConta,
@@ -24,7 +22,8 @@ function EditarConta() {
   const { account } = Route.useLoaderData();
   return (
     <AdminShell title="Editar conta" description={account.title}>
-      <AccountForm account={account} />
+      {/* key: ao navegar entre contas o formulário é recriado com os dados certos */}
+      <AccountForm key={account.id} account={account} />
     </AdminShell>
   );
 }

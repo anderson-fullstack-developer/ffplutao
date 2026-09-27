@@ -44,11 +44,13 @@
 
 **Teste:** o catálogo mostra os dados do seed.
 
-## Fase 4 — Painel do admin
-- [ ] 16. Criar, editar, publicar e desativar contas; credenciais encriptadas com AES-256-GCM
-- [ ] 17. Admin só escolhe `DRAFT` / `AVAILABLE` / `DISABLED` — `RESERVED` e `SOLD` são automáticos
-- [ ] 18. Upload de screenshots para Cloudinary (principal, ordem, exclusão) — *utilizador: chaves Cloudinary*
-- [ ] 19. Listas reais de pedidos e clientes
+## Fase 4 — Painel do admin ✅
+- [x] 16. Criar, editar, publicar, desativar e excluir contas; credenciais encriptadas; na edição as credenciais não são enviadas ao formulário (botão "ver credenciais atuais")
+- [x] 17. Admin só escolhe `DRAFT` / `AVAILABLE` / `DISABLED`; conta reservada/vendida tem estado e preço bloqueados (linha bloqueada com `FOR UPDATE`); publicar exige imagem + credenciais; excluir só sem pedidos
+- [x] 18. Upload direto browser → Cloudinary com assinatura do servidor (pasta e formatos fixos); só aceita imagens do nosso Cloudinary; imagens removidas são apagadas no Cloudinary (nunca as do seed)
+- [x] 19. Dashboard (vendas, pedidos, stock, clientes, gráfico 30 dias), pedidos e clientes com dados reais; todas as funções de admin verificam o papel no servidor
+
+**Verificado:** 46 testes (acesso negado a anónimo/cliente em todas as funções, upload real e assinatura adulterada, regras de publicação, bloqueios de conta reservada, exclusão com/sem pedidos, imagem apagada no Cloudinary).
 
 **Teste:** criar uma conta no admin e ela aparece no catálogo.
 
@@ -88,7 +90,7 @@
 ---
 
 ## Ajustes de interface (feitos ao ligar cada fase)
-- [ ] Formulário do admin: trocar "Status: Disponível/Reservada/Vendida" por **Rascunho / Publicada / Desativada** (Fase 4)
+- [x] Formulário do admin: trocar "Status: Disponível/Reservada/Vendida" por **Rascunho / Publicada / Desativada** (Fase 4)
 - [ ] Checkout: remover os campos nome/email/país; deixar só o resumo e o botão **"Pagar com Stripe"** (Fase 5)
 - [ ] `/compra/sucesso`: estado **"A confirmar pagamento…"** antes de "Compra concluída" (Fase 5)
 - [x] Badges: acrescentar **Rascunho**, **Desativada**, **Falhado** (Fase 3)
