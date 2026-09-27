@@ -25,11 +25,13 @@
 
 **Teste:** as tabelas aparecem no painel do Neon.
 
-## Fase 2 — Autenticação
-- [ ] 9. Registo e login (email + password com hash Argon2)
-- [ ] 10. Sessão em cookie httpOnly seguro, logout
-- [ ] 11. Papéis `USER` / `ADMIN`; `/admin` e `/dashboard` protegidos **no servidor**
-- [ ] 12. Substituir a sessão falsa (`src/lib/session.tsx`) pela real
+## Fase 2 — Autenticação ✅
+- [x] 9. Registo e login (email + senha com hash Argon2id); alterar nome e senha em "Minha conta"
+- [x] 10. Sessão em cookie HttpOnly (token opaco, BD guarda só o SHA-256), logout, troca de senha termina as outras sessões; limite de tentativas no Postgres
+- [x] 11. Papéis `USER` / `ADMIN`; `/admin` (404 para clientes), `/dashboard` e `/checkout` protegidos no servidor; `npm run admin:create -- email`
+- [x] 12. Sessão falsa substituída pela real (navbar, dashboard, perfil, admin)
+
+**Verificado:** 36 testes ponta a ponta (registo, login, logout, cookie roubado, CSRF, limite de tentativas, troca de senha, acesso admin).
 
 **Teste:** criar conta, fazer login; um USER a tentar abrir `/admin` é bloqueado.
 
@@ -88,5 +90,5 @@
 - [ ] Checkout: remover os campos nome/email/país; deixar só o resumo e o botão **"Pagar com Stripe"** (Fase 5)
 - [ ] `/compra/sucesso`: estado **"A confirmar pagamento…"** antes de "Compra concluída" (Fase 5)
 - [ ] Badges: acrescentar **Rascunho**, **Desativada**, **Falhado** (Fase 3)
-- [ ] Remover o botão "Continuar com Google" do login, até haver decisão sobre login social (Fase 2)
+- [x] Remover o botão "Continuar com Google" do login, até haver decisão sobre login social (Fase 2)
 - [ ] Tirar `credentials` do tipo `Order` do frontend (Fase 6)
