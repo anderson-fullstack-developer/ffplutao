@@ -91,7 +91,7 @@ function Login() {
                 name="email"
                 type="email"
                 autoComplete="email"
-                placeholder="voce@example.test"
+                placeholder="o-seu@email.com"
                 aria-invalid={Boolean(fieldErrors["email"])}
                 required
               />

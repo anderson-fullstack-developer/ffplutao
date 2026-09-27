@@ -22,19 +22,6 @@ const map: Record<string, { label: string; className: string }> = {
   CLOSED: { label: "Fechado", className: muted },
   USER: { label: "Cliente", className: muted },
   ADMIN: { label: "Admin", className: "bg-primary/15 text-primary border-primary/30" },
-  // Estados dos dados de demonstração (removidos nas próximas fases)
-  disponivel: { label: "Disponível", className: "bg-success/15 text-success border-success/30" },
-  reservada: { label: "Reservada", className: "bg-warning/15 text-warning border-warning/30" },
-  vendida: { label: "Vendida", className: "bg-muted text-muted-foreground border-border" },
-  pago: { label: "Pago", className: "bg-success/15 text-success border-success/30" },
-  pendente: { label: "Pendente", className: "bg-warning/15 text-warning border-warning/30" },
-  cancelado: {
-    label: "Cancelado",
-    className: "bg-destructive/15 text-destructive border-destructive/30",
-  },
-  reembolsado: { label: "Reembolsado", className: "bg-muted text-muted-foreground border-border" },
-  ativo: { label: "Ativo", className: "bg-success/15 text-success border-success/30" },
-  inativo: { label: "Inativo", className: "bg-muted text-muted-foreground border-border" },
 };
 
 export function StatusBadge({ status, className }: { status: string; className?: string }) {

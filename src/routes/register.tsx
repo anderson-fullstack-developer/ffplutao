@@ -82,13 +82,7 @@ function Register() {
           <form onSubmit={submit} className="mt-7 space-y-4" noValidate>
             {error ? <FormError message={error} /> : null}
             <Field label="Nome" htmlFor="nome">
-              <Input
-                id="nome"
-                name="name"
-                autoComplete="name"
-                placeholder="João Martins"
-                required
-              />
+              <Input id="nome" name="name" autoComplete="name" placeholder="O seu nome" required />
               <FieldError message={fieldErrors["name"]} />
             </Field>
             <Field label="Email" htmlFor="email">
@@ -97,7 +91,7 @@ function Register() {
                 name="email"
                 type="email"
                 autoComplete="email"
-                placeholder="voce@example.test"
+                placeholder="o-seu@email.com"
                 required
               />
               <FieldError message={fieldErrors["email"]} />
