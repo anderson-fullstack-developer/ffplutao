@@ -44,16 +44,19 @@ export async function listAdminAccounts(filters: {
     conditions.push(sql`${accounts.title} ilike ${pattern}`);
   }
 
+  // Subconsultas correlacionadas com nomes de tabela EXPLÍCITOS: numa consulta de uma só
+  // tabela o Drizzle escreve as colunas sem prefixo, e "account_id" = "id" passaria a
+  // comparar a subtabela com ela própria (a capa vinha sempre vazia e os pedidos a 0).
   const cover = sql<string | null>`(
-    select ${accountImages.url} from ${accountImages}
-    where ${accountImages.accountId} = ${accounts.id}
-    order by ${accountImages.position} asc limit 1
+    select ai.url from account_images ai
+    where ai.account_id = accounts.id
+    order by ai.position asc, ai.created_at asc limit 1
   )`;
   const hasCredentials = sql<boolean>`exists (
-    select 1 from ${accountCredentials} where ${accountCredentials.accountId} = ${accounts.id}
+    select 1 from account_credentials ac where ac.account_id = accounts.id
   )`;
   const ordersCount = sql<number>`(
-    select count(*)::int from ${orders} where ${orders.accountId} = ${accounts.id}
+    select count(*)::int from orders o where o.account_id = accounts.id
   )`;
 
   const rows = await db
