@@ -12,7 +12,7 @@ import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { SessionProvider } from "../lib/session";
+import { sessionQueryOptions } from "../lib/session";
 
 function NotFoundComponent() {
   return (
@@ -75,6 +75,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  // Utilizador atual (ou null) disponível em todas as rotas via contexto.
+  // É só para a interface: cada server function volta a validar a sessão.
+  beforeLoad: async ({ context }) => {
+    const user = await context.queryClient.fetchQuery(sessionQueryOptions());
+    return { user };
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -122,11 +128,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SessionProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <Toaster theme="dark" position="top-center" richColors />
-      </SessionProvider>
+      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <Outlet />
+      <Toaster theme="dark" position="top-center" richColors />
     </QueryClientProvider>
   );
 }

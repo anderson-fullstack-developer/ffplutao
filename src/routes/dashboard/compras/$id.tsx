@@ -39,7 +39,10 @@ function CompraDetalhe() {
   };
 
   return (
-    <DashboardShell title={`Pedido ${order.reference}`} description={`Realizado em ${formatDate(order.date)}`}>
+    <DashboardShell
+      title={`Pedido ${order.reference}`}
+      description={`Realizado em ${formatDate(order.date)}`}
+    >
       <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
         <div className="space-y-6">
           <section className="surface-panel p-6">
@@ -162,12 +165,7 @@ function Credential({
           {revealed ? value : "••••••••••••••••"}
         </p>
       </div>
-      <Button
-        size="sm"
-        variant="outline"
-        disabled={!revealed}
-        onClick={() => onCopy(value)}
-      >
+      <Button size="sm" variant="outline" disabled={!revealed} onClick={() => onCopy(value)}>
         <Copy className="size-4" /> Copiar {label === "Senha" ? "senha" : "login"}
       </Button>
     </div>

@@ -64,6 +64,37 @@ export const users = pgTable(
 );
 
 // ============================================================
+// Sessões (cookie com token opaco; aqui só fica o SHA-256 do token)
+// ============================================================
+
+export const sessions = pgTable(
+  "sessions",
+  {
+    /** SHA-256 (hex) do token do cookie. O token em si nunca é guardado. */
+    id: text("id").primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("sessions_user_idx").on(t.userId), index("sessions_expires_idx").on(t.expiresAt)],
+);
+
+// ============================================================
+// Limite de tentativas (login/registo) — partilhado entre instâncias serverless
+// ============================================================
+
+export const authRateLimits = pgTable("auth_rate_limits", {
+  /** Ex.: "login:email:joao@x.pt", "login:ip:1.2.3.4" */
+  key: text("key").primaryKey(),
+  count: integer("count").notNull(),
+  windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+});
+
+// ============================================================
 // Contas de jogo (produtos) — só dados PÚBLICOS nesta tabela
 // ============================================================
 

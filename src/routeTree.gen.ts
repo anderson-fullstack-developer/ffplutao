@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as SuporteRouteImport } from './routes/suporte'
@@ -34,9 +36,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComoFuncionaRoute = ComoFuncionaRouteImport.update({
   id: '/como-funciona',
   path: '/como-funciona',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -55,19 +67,19 @@ const SuporteRoute = SuporteRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/admin/',
-  path: '/admin/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminClientesRoute = AdminClientesRouteImport.update({
-  id: '/admin/clientes',
-  path: '/admin/clientes',
-  getParentRoute: () => rootRouteImport,
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminPedidosRoute = AdminPedidosRouteImport.update({
-  id: '/admin/pedidos',
-  path: '/admin/pedidos',
-  getParentRoute: () => rootRouteImport,
+  id: '/pedidos',
+  path: '/pedidos',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const CheckoutIdRoute = CheckoutIdRouteImport.update({
   id: '/checkout/$id',
@@ -90,43 +102,45 @@ const ContasIdRoute = ContasIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/dashboard/',
-  path: '/dashboard/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardPerfilRoute = DashboardPerfilRouteImport.update({
-  id: '/dashboard/perfil',
-  path: '/dashboard/perfil',
-  getParentRoute: () => rootRouteImport,
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 const AdminContasIndexRoute = AdminContasIndexRouteImport.update({
-  id: '/admin/contas/',
-  path: '/admin/contas/',
-  getParentRoute: () => rootRouteImport,
+  id: '/contas/',
+  path: '/contas/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminContasNovaRoute = AdminContasNovaRouteImport.update({
-  id: '/admin/contas/nova',
-  path: '/admin/contas/nova',
-  getParentRoute: () => rootRouteImport,
+  id: '/contas/nova',
+  path: '/contas/nova',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const DashboardComprasIndexRoute = DashboardComprasIndexRouteImport.update({
-  id: '/dashboard/compras/',
-  path: '/dashboard/compras/',
-  getParentRoute: () => rootRouteImport,
+  id: '/compras/',
+  path: '/compras/',
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardComprasIdRoute = DashboardComprasIdRouteImport.update({
-  id: '/dashboard/compras/$id',
-  path: '/dashboard/compras/$id',
-  getParentRoute: () => rootRouteImport,
+  id: '/compras/$id',
+  path: '/compras/$id',
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 const AdminContasIdEditarRoute = AdminContasIdEditarRouteImport.update({
-  id: '/admin/contas/$id/editar',
-  path: '/admin/contas/$id/editar',
-  getParentRoute: () => rootRouteImport,
+  id: '/contas/$id/editar',
+  path: '/contas/$id/editar',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/como-funciona': typeof ComoFuncionaRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -170,6 +184,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/como-funciona': typeof ComoFuncionaRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -193,6 +209,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
+    | '/dashboard'
     | '/como-funciona'
     | '/login'
     | '/register'
@@ -235,6 +253,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
+    | '/dashboard'
     | '/como-funciona'
     | '/login'
     | '/register'
@@ -257,24 +277,16 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   ComoFuncionaRoute: typeof ComoFuncionaRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   SuporteRoute: typeof SuporteRoute
-  AdminClientesRoute: typeof AdminClientesRoute
-  AdminPedidosRoute: typeof AdminPedidosRoute
   CheckoutIdRoute: typeof CheckoutIdRoute
   CompraSucessoRoute: typeof CompraSucessoRoute
   ContasIdRoute: typeof ContasIdRoute
-  DashboardPerfilRoute: typeof DashboardPerfilRoute
-  AdminIndexRoute: typeof AdminIndexRoute
   ContasIndexRoute: typeof ContasIndexRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
-  AdminContasNovaRoute: typeof AdminContasNovaRoute
-  DashboardComprasIdRoute: typeof DashboardComprasIdRoute
-  AdminContasIndexRoute: typeof AdminContasIndexRoute
-  DashboardComprasIndexRoute: typeof DashboardComprasIndexRoute
-  AdminContasIdEditarRoute: typeof AdminContasIdEditarRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -286,11 +298,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/como-funciona': {
       id: '/como-funciona'
       path: '/como-funciona'
       fullPath: '/como-funciona'
       preLoaderRoute: typeof ComoFuncionaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -316,24 +342,24 @@ declare module '@tanstack/react-router' {
     }
     '/admin/': {
       id: '/admin/'
-      path: '/admin'
+      path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/admin/clientes': {
       id: '/admin/clientes'
-      path: '/admin/clientes'
+      path: '/clientes'
       fullPath: '/admin/clientes'
       preLoaderRoute: typeof AdminClientesRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/admin/pedidos': {
       id: '/admin/pedidos'
-      path: '/admin/pedidos'
+      path: '/pedidos'
       fullPath: '/admin/pedidos'
       preLoaderRoute: typeof AdminPedidosRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/checkout/$id': {
       id: '/checkout/$id'
@@ -365,76 +391,108 @@ declare module '@tanstack/react-router' {
     }
     '/dashboard/': {
       id: '/dashboard/'
-      path: '/dashboard'
+      path: '/'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/perfil': {
       id: '/dashboard/perfil'
-      path: '/dashboard/perfil'
+      path: '/perfil'
       fullPath: '/dashboard/perfil'
       preLoaderRoute: typeof DashboardPerfilRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/admin/contas/': {
       id: '/admin/contas/'
-      path: '/admin/contas'
+      path: '/contas'
       fullPath: '/admin/contas/'
       preLoaderRoute: typeof AdminContasIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/admin/contas/nova': {
       id: '/admin/contas/nova'
-      path: '/admin/contas/nova'
+      path: '/contas/nova'
       fullPath: '/admin/contas/nova'
       preLoaderRoute: typeof AdminContasNovaRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/dashboard/compras/': {
       id: '/dashboard/compras/'
-      path: '/dashboard/compras'
+      path: '/compras'
       fullPath: '/dashboard/compras/'
       preLoaderRoute: typeof DashboardComprasIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/compras/$id': {
       id: '/dashboard/compras/$id'
-      path: '/dashboard/compras/$id'
+      path: '/compras/$id'
       fullPath: '/dashboard/compras/$id'
       preLoaderRoute: typeof DashboardComprasIdRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/admin/contas/$id/editar': {
       id: '/admin/contas/$id/editar'
-      path: '/admin/contas/$id/editar'
+      path: '/contas/$id/editar'
       fullPath: '/admin/contas/$id/editar'
       preLoaderRoute: typeof AdminContasIdEditarRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
   }
 }
 
+interface AdminRouteRouteChildren {
+  AdminClientesRoute: typeof AdminClientesRoute
+  AdminPedidosRoute: typeof AdminPedidosRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminContasNovaRoute: typeof AdminContasNovaRoute
+  AdminContasIndexRoute: typeof AdminContasIndexRoute
+  AdminContasIdEditarRoute: typeof AdminContasIdEditarRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminClientesRoute: AdminClientesRoute,
+  AdminPedidosRoute: AdminPedidosRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminContasNovaRoute: AdminContasNovaRoute,
+  AdminContasIndexRoute: AdminContasIndexRoute,
+  AdminContasIdEditarRoute: AdminContasIdEditarRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
+interface DashboardRouteRouteChildren {
+  DashboardPerfilRoute: typeof DashboardPerfilRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardComprasIdRoute: typeof DashboardComprasIdRoute
+  DashboardComprasIndexRoute: typeof DashboardComprasIndexRoute
+}
+
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardPerfilRoute: DashboardPerfilRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardComprasIdRoute: DashboardComprasIdRoute,
+  DashboardComprasIndexRoute: DashboardComprasIndexRoute,
+}
+
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
   ComoFuncionaRoute: ComoFuncionaRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   SuporteRoute: SuporteRoute,
-  AdminClientesRoute: AdminClientesRoute,
-  AdminPedidosRoute: AdminPedidosRoute,
   CheckoutIdRoute: CheckoutIdRoute,
   CompraSucessoRoute: CompraSucessoRoute,
   ContasIdRoute: ContasIdRoute,
-  DashboardPerfilRoute: DashboardPerfilRoute,
-  AdminIndexRoute: AdminIndexRoute,
   ContasIndexRoute: ContasIndexRoute,
-  DashboardIndexRoute: DashboardIndexRoute,
-  AdminContasNovaRoute: AdminContasNovaRoute,
-  DashboardComprasIdRoute: DashboardComprasIdRoute,
-  AdminContasIndexRoute: AdminContasIndexRoute,
-  DashboardComprasIndexRoute: DashboardComprasIndexRoute,
-  AdminContasIdEditarRoute: AdminContasIdEditarRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

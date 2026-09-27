@@ -1,12 +1,22 @@
 import * as React from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
+import { z } from "zod";
 import { Logo } from "@/components/store/logo";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
-import { useSession } from "@/lib/session";
+import { FormError } from "@/components/ui/form-error";
+import { loginFn } from "@/functions/auth";
+import { safeRedirectPath } from "@/lib/auth-schemas";
+import { useRefreshSession } from "@/lib/session";
 
 export const Route = createFileRoute("/login")({
+  validateSearch: z.object({ redirect: z.string().optional() }),
+  beforeLoad: ({ context, search }) => {
+    if (context.user) {
+      throw redirect({ href: safeRedirectPath(search.redirect) });
+    }
+  },
   head: () => ({
     meta: [
       { title: "Entrar | Plutão Shop" },
@@ -19,17 +29,39 @@ export const Route = createFileRoute("/login")({
 });
 
 function Login() {
-  const navigate = useNavigate();
-  const { signIn } = useSession();
+  const search = Route.useSearch();
+  const router = useRouter();
+  const refreshSession = useRefreshSession();
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
 
-  const submit = (event: React.FormEvent) => {
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = new FormData(event.currentTarget);
     setLoading(true);
-    setTimeout(() => {
-      signIn();
-      navigate({ to: "/dashboard" });
-    }, 900);
+    setError(null);
+    setFieldErrors({});
+
+    try {
+      const result = await loginFn({
+        data: {
+          email: String(form.get("email") ?? ""),
+          password: String(form.get("password") ?? ""),
+        },
+      });
+      if (!result.ok) {
+        setError(result.error);
+        setFieldErrors(result.fieldErrors ?? {});
+        return;
+      }
+      await refreshSession();
+      await router.navigate({ href: safeRedirectPath(search.redirect) });
+    } catch {
+      setError("Não foi possível entrar. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -44,19 +76,31 @@ function Login() {
             Entre para ver as suas compras e dados de acesso.
           </p>
 
-          <form onSubmit={submit} className="mt-7 space-y-4">
+          <form onSubmit={submit} className="mt-7 space-y-4" noValidate>
+            {error ? <FormError message={error} /> : null}
             <Field label="Email" htmlFor="email">
-              <Input id="email" type="email" placeholder="voce@example.test" required />
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="voce@example.test"
+                aria-invalid={Boolean(fieldErrors["email"])}
+                required
+              />
             </Field>
             <Field label="Senha" htmlFor="senha">
-              <Input id="senha" type="password" placeholder="••••••••" required />
+              <Input
+                id="senha"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                placeholder="••••••••"
+                required
+              />
             </Field>
 
-            <div className="flex items-center justify-between gap-3 text-sm">
-              <label className="flex cursor-pointer items-center gap-2 text-muted-foreground">
-                <input type="checkbox" className="size-4 accent-[oklch(0.82_0.165_78)]" />
-                Lembrar-me
-              </label>
+            <div className="flex justify-end text-sm">
               <Link to="/suporte" className="text-primary hover:underline">
                 Esqueci minha senha
               </Link>
@@ -67,17 +111,13 @@ function Login() {
             </Button>
           </form>
 
-          <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="h-px flex-1 bg-border" /> ou <span className="h-px flex-1 bg-border" />
-          </div>
-
-          <Button variant="outline" size="lg" className="w-full" onClick={submit}>
-            Continuar com Google
-          </Button>
-
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Não tem uma conta?{" "}
-            <Link to="/register" className="font-semibold text-primary hover:underline">
+            <Link
+              to="/register"
+              search={search.redirect ? { redirect: search.redirect } : {}}
+              className="font-semibold text-primary hover:underline"
+            >
               Criar conta
             </Link>
           </p>

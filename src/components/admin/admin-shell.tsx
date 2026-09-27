@@ -16,6 +16,7 @@ import {
 import { Logo } from "@/components/store/logo";
 import { Input } from "@/components/ui/field";
 import { cn } from "@/lib/format";
+import { initialsOf, useSession } from "@/lib/session";
 
 const items = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -39,6 +40,7 @@ export function AdminShell({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(false);
+  const { user } = useSession();
 
   return (
     <div className="min-h-screen bg-background lg:flex">
@@ -72,8 +74,11 @@ export function AdminShell({
               <Bell className="size-4" />
               <span className="absolute top-2 right-2 size-2 rounded-full bg-accent" />
             </button>
-            <span className="gold-surface flex size-9 items-center justify-center rounded-full text-xs font-bold">
-              AD
+            <span
+              title={user?.name}
+              className="gold-surface flex size-9 items-center justify-center rounded-full text-xs font-bold"
+            >
+              {user ? initialsOf(user.name) : "AD"}
             </span>
           </div>
         </header>
@@ -116,6 +121,7 @@ export function AdminShell({
 }
 
 function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+  const { signOut } = useSession();
   return (
     <nav className="space-y-1 p-3">
       {items.map((item) => (
@@ -140,17 +146,21 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
       >
         Voltar à loja
       </Link>
+      <button
+        type="button"
+        onClick={() => {
+          onNavigate?.();
+          void signOut();
+        }}
+        className="block w-full cursor-pointer rounded-lg px-3 py-2.5 text-center text-sm text-muted-foreground hover:text-foreground"
+      >
+        Sair
+      </button>
     </nav>
   );
 }
 
-export function DataTable({
-  headers,
-  children,
-}: {
-  headers: string[];
-  children: React.ReactNode;
-}) {
+export function DataTable({ headers, children }: { headers: string[]; children: React.ReactNode }) {
   return (
     <div className="surface-panel overflow-hidden">
       <div className="overflow-x-auto">

@@ -1,11 +1,10 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { LogOut, Menu, ShoppingBag, User, LifeBuoy, X } from "lucide-react";
+import { LogOut, Menu, ShoppingBag, Shield, User, LifeBuoy, X } from "lucide-react";
 import { Logo } from "@/components/store/logo";
 import { Button } from "@/components/ui/button";
-import { useSession } from "@/lib/session";
-import { currentUser } from "@/mock/users";
+import { initialsOf, useSession } from "@/lib/session";
 import { cn } from "@/lib/format";
 
 const links = [
@@ -18,7 +17,7 @@ const links = [
 export function Navbar() {
   const [scrolled, setScrolled] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const { isAuthenticated, signOut } = useSession();
+  const { user, signOut } = useSession();
 
   React.useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -53,13 +52,13 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          {isAuthenticated ? (
+          {user ? (
             <DropdownMenu.Root>
               <DropdownMenu.Trigger className="flex cursor-pointer items-center gap-2 rounded-full border border-border bg-surface/70 py-1.5 pr-4 pl-1.5 text-sm font-medium transition-colors hover:border-primary/40">
                 <span className="gold-surface flex size-7 items-center justify-center rounded-full text-xs font-bold">
-                  {currentUser.avatarInitials}
+                  {initialsOf(user.name)}
                 </span>
-                {currentUser.name.split(" ")[0]}
+                {user.name.split(" ")[0]}
               </DropdownMenu.Trigger>
               <DropdownMenu.Portal>
                 <DropdownMenu.Content
@@ -67,6 +66,11 @@ export function Navbar() {
                   sideOffset={8}
                   className="surface-panel z-50 w-52 p-1.5 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:zoom-in-95"
                 >
+                  {user.role === "ADMIN" ? (
+                    <DropdownItem to="/admin" icon={<Shield className="size-4" />}>
+                      Painel admin
+                    </DropdownItem>
+                  ) : null}
                   <DropdownItem to="/dashboard/perfil" icon={<User className="size-4" />}>
                     Minha conta
                   </DropdownItem>
@@ -78,7 +82,7 @@ export function Navbar() {
                   </DropdownItem>
                   <DropdownMenu.Separator className="my-1.5 h-px bg-border" />
                   <DropdownMenu.Item
-                    onSelect={signOut}
+                    onSelect={() => void signOut()}
                     className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground outline-none data-[highlighted]:bg-secondary data-[highlighted]:text-foreground"
                   >
                     <LogOut className="size-4" />
@@ -124,14 +128,14 @@ export function Navbar() {
             ))}
           </nav>
           <div className="grid gap-2">
-            {isAuthenticated ? (
+            {user ? (
               <>
                 <Button asChild variant="secondary" size="lg">
                   <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
                     Meu painel
                   </Link>
                 </Button>
-                <Button variant="ghost" size="lg" onClick={signOut}>
+                <Button variant="ghost" size="lg" onClick={() => void signOut()}>
                   Sair
                 </Button>
               </>

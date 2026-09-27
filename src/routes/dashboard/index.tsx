@@ -5,7 +5,7 @@ import { StatCard } from "@/components/ui/misc";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { myOrders } from "@/mock/orders";
-import { currentUser } from "@/mock/users";
+import { useSession } from "@/lib/session";
 import { formatDate, formatPrice } from "@/lib/format";
 
 export const Route = createFileRoute("/dashboard/")({
@@ -21,10 +21,11 @@ export const Route = createFileRoute("/dashboard/")({
 });
 
 function DashboardHome() {
+  const { user } = useSession();
   const lastOrder = myOrders[0];
   return (
     <DashboardShell
-      title={`Olá, ${currentUser.name.split(" ")[0]} 👋`}
+      title={`Olá, ${user?.name.split(" ")[0] ?? ""} 👋`}
       description="Bem-vindo de volta à Plutão Shop."
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

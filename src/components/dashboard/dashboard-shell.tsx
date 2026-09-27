@@ -23,7 +23,8 @@ export function DashboardShell({
   children: React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(false);
-  const { signOut } = useSession();
+  const session = useSession();
+  const signOut = () => void session.signOut();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -80,13 +81,7 @@ export function DashboardShell({
   );
 }
 
-function SidebarNav({
-  onNavigate,
-  onSignOut,
-}: {
-  onNavigate?: () => void;
-  onSignOut: () => void;
-}) {
+function SidebarNav({ onNavigate, onSignOut }: { onNavigate?: () => void; onSignOut: () => void }) {
   return (
     <nav className="surface-panel space-y-1 p-2">
       {items.map((item) => (
@@ -104,17 +99,17 @@ function SidebarNav({
           {item.label}
         </Link>
       ))}
-      <Link
-        to="/"
+      <button
+        type="button"
         onClick={() => {
-          onSignOut();
           onNavigate?.();
+          onSignOut();
         }}
-        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
       >
         <LogOut className="size-4" />
         Sair
-      </Link>
+      </button>
     </nav>
   );
 }

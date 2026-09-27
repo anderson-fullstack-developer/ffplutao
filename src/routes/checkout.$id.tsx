@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect, useNavigate } from "@tanstack/react-router";
 import { Loader2, Lock, ShieldCheck } from "lucide-react";
 import { StoreLayout } from "@/components/store/store-layout";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,12 @@ import { getAccount } from "@/mock/accounts";
 import { formatPrice } from "@/lib/format";
 
 export const Route = createFileRoute("/checkout/$id")({
+  // Comprar exige sessão iniciada.
+  beforeLoad: ({ context, location }) => {
+    if (!context.user) {
+      throw redirect({ to: "/login", search: { redirect: location.href } });
+    }
+  },
   loader: ({ params }) => {
     const account = getAccount(params.id);
     if (!account) throw notFound();
