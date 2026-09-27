@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Eye, ImagePlus, Loader2, Lock, ShieldCheck, Star, Trash2 } from "lucide-react";
+import { Eye, ImagePlus, Loader2, Lock, Move, ShieldCheck, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field, FormSection, Input, Select, Textarea } from "@/components/ui/field";
 import { FieldError, FormError } from "@/components/ui/form-error";
@@ -151,21 +151,26 @@ export function AccountForm({ account }: { account?: AdminAccountDetail }) {
   };
 
   const remove = (index: number) => setImages((prev) => prev.filter((_, i) => i !== index));
-  const makePrimary = (index: number) =>
+  /** Move a imagem de `from` para a posição `to` (as outras deslizam). Posição 0 = capa. */
+  const reorder = (from: number, to: number) =>
     setImages((prev) => {
-      const current = prev[index];
-      return current ? [current, ...prev.filter((_, i) => i !== index)] : prev;
-    });
-  const move = (index: number, direction: -1 | 1) =>
-    setImages((prev) => {
+      if (from === to || to < 0 || to >= prev.length) return prev;
       const next = [...prev];
-      const a = next[index];
-      const b = next[index + direction];
-      if (a === undefined || b === undefined) return prev;
-      next[index] = b;
-      next[index + direction] = a;
+      const [item] = next.splice(from, 1);
+      if (!item) return prev;
+      next.splice(to, 0, item);
       return next;
     });
+  const makeCover = (index: number) => reorder(index, 0);
+  const move = (index: number, direction: -1 | 1) => reorder(index, index + direction);
+
+  // Arrastar miniaturas com o rato (desktop). No telemóvel ficam os botões ← ★ →.
+  const [dragFrom, setDragFrom] = React.useState<number | null>(null);
+  const [dragOver, setDragOver] = React.useState<number | null>(null);
+  const endDrag = () => {
+    setDragFrom(null);
+    setDragOver(null);
+  };
 
   // ---------- Guardar ----------
 
@@ -469,7 +474,8 @@ export function AccountForm({ account }: { account?: AdminAccountDetail }) {
           onClick={() => fileInput.current?.click()}
           onDragOver={(e) => {
             e.preventDefault();
-            setDragging(true);
+            // Só acende para ficheiros vindos do computador, não para miniaturas.
+            if (e.dataTransfer.types.includes("Files")) setDragging(true);
           }}
           onDragLeave={() => setDragging(false)}
           onDrop={(e) => {
@@ -497,40 +503,84 @@ export function AccountForm({ account }: { account?: AdminAccountDetail }) {
         <FieldError message={err("images")} />
 
         {images.length ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {images.map((image, index) => (
-              <div
-                key={image.publicId}
-                className="group relative overflow-hidden rounded-lg border border-border"
-              >
-                <img
-                  src={image.url.replace("/image/upload/", "/image/upload/f_auto,q_auto,w_400/")}
-                  alt={`Screenshot ${index + 1}`}
-                  loading="lazy"
-                  className="aspect-[16/10] w-full object-cover"
-                />
-                {index === 0 ? (
-                  <span className="gold-surface absolute top-2 left-2 rounded-full px-2 py-0.5 text-[10px] font-bold">
-                    Principal
-                  </span>
-                ) : null}
-                <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1 bg-background/85 p-1.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
-                  <IconBtn label="Mover para trás" onClick={() => move(index, -1)}>
-                    ←
-                  </IconBtn>
-                  <IconBtn label="Definir como principal" onClick={() => makePrimary(index)}>
-                    <Star className="size-3.5" />
-                  </IconBtn>
-                  <IconBtn label="Mover para a frente" onClick={() => move(index, 1)}>
-                    →
-                  </IconBtn>
-                  <IconBtn label="Excluir imagem" onClick={() => remove(index)}>
-                    <Trash2 className="size-3.5" />
-                  </IconBtn>
+          <>
+            {images.length > 1 ? (
+              <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Move className="size-3.5 text-primary" />
+                Arraste as imagens para mudar a ordem. A primeira é a capa do anúncio.
+              </p>
+            ) : null}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {images.map((image, index) => (
+                <div
+                  key={image.publicId}
+                  draggable
+                  onDragStart={(e) => {
+                    setDragFrom(index);
+                    e.dataTransfer.effectAllowed = "move";
+                    e.dataTransfer.setData("text/plain", String(index)); // necessário no Firefox
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = dragFrom === null ? "copy" : "move";
+                    if (dragOver !== index) setDragOver(index);
+                  }}
+                  onDragLeave={() => setDragOver((current) => (current === index ? null : current))}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (dragFrom !== null) reorder(dragFrom, index);
+                    else if (e.dataTransfer.files.length) void uploadFiles(e.dataTransfer.files);
+                    endDrag();
+                  }}
+                  onDragEnd={endDrag}
+                  className={cn(
+                    "group relative cursor-grab overflow-hidden rounded-lg border border-border transition-all active:cursor-grabbing",
+                    dragFrom === index && "opacity-40",
+                    dragOver === index &&
+                      dragFrom !== null &&
+                      dragFrom !== index &&
+                      "ring-2 ring-primary ring-offset-2 ring-offset-background",
+                  )}
+                >
+                  <img
+                    src={image.url.replace("/image/upload/", "/image/upload/f_auto,q_auto,w_400/")}
+                    alt={`Screenshot ${index + 1}`}
+                    loading="lazy"
+                    draggable={false}
+                    className="pointer-events-none aspect-[16/10] w-full object-cover select-none"
+                  />
+                  {index === 0 ? (
+                    <span className="gold-surface absolute top-2 left-2 rounded-full px-2 py-0.5 text-[10px] font-bold">
+                      Capa
+                    </span>
+                  ) : (
+                    <span className="absolute top-2 left-2 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                      {index + 1}
+                    </span>
+                  )}
+                  {index === 0 && dragOver === 0 && dragFrom !== null && dragFrom !== 0 ? (
+                    <span className="absolute inset-0 flex items-center justify-center bg-primary/25 text-xs font-bold text-foreground backdrop-blur-[1px]">
+                      Largar aqui para definir como capa
+                    </span>
+                  ) : null}
+                  <div className="absolute inset-x-0 bottom-0 flex justify-center gap-1 bg-background/85 p-1.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+                    <IconBtn label="Mover para trás" onClick={() => move(index, -1)}>
+                      ←
+                    </IconBtn>
+                    <IconBtn label="Definir como capa" onClick={() => makeCover(index)}>
+                      <Star className="size-3.5" />
+                    </IconBtn>
+                    <IconBtn label="Mover para a frente" onClick={() => move(index, 1)}>
+                      →
+                    </IconBtn>
+                    <IconBtn label="Excluir imagem" onClick={() => remove(index)}>
+                      <Trash2 className="size-3.5" />
+                    </IconBtn>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         ) : null}
       </FormSection>
 
