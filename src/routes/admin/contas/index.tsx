@@ -14,6 +14,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { z } from "zod";
+import { AccountPreviewModal } from "@/components/admin/account-preview-modal";
 import { AdminShell, DataTable } from "@/components/admin/admin-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/field";
@@ -57,6 +58,7 @@ function AdminContas() {
   const router = useRouter();
   const [query, setQuery] = React.useState(search.q ?? "");
   const [toDelete, setToDelete] = React.useState<AdminAccountRow | null>(null);
+  const [preview, setPreview] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const value = query.trim();
@@ -143,32 +145,34 @@ function AdminContas() {
           headers={["Imagem", "Conta", "Level", "Servidor", "Preço", "Estado", "Criada", "Ações"]}
         >
           {rows.map((account) => (
-            <tr key={account.id} className="transition-colors hover:bg-surface-2/30">
+            <tr
+              key={account.id}
+              tabIndex={0}
+              onClick={() => setPreview(account.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") setPreview(account.id);
+              }}
+              className="cursor-pointer transition-colors outline-none hover:bg-surface-2/30 focus-visible:bg-surface-2/40"
+            >
               <td className="px-4 py-3">
                 {account.coverUrl ? (
                   <img
                     src={account.coverUrl.replace(
                       "/image/upload/",
-                      "/image/upload/f_auto,q_auto,w_120/",
+                      "/image/upload/f_auto,q_auto,c_fill,w_112,h_72/",
                     )}
                     alt=""
                     loading="lazy"
-                    className="size-12 rounded-md object-cover"
+                    className="h-9 w-14 rounded object-cover"
                   />
                 ) : (
-                  <span className="flex size-12 items-center justify-center rounded-md bg-surface text-muted-foreground">
-                    <ImageOff className="size-4" />
+                  <span className="flex h-9 w-14 items-center justify-center rounded bg-surface text-muted-foreground">
+                    <ImageOff className="size-3.5" />
                   </span>
                 )}
               </td>
               <td className="px-4 py-3">
-                <Link
-                  to="/admin/contas/$id/editar"
-                  params={{ id: account.id }}
-                  className="font-semibold hover:text-primary"
-                >
-                  {account.title}
-                </Link>
+                <span className="font-semibold">{account.title}</span>
                 <div className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground">
                   {account.featured ? (
                     <span className="inline-flex items-center gap-1 text-primary">
@@ -191,7 +195,12 @@ function AdminContas() {
                 <StatusBadge status={account.status} />
               </td>
               <td className="px-4 py-3 text-muted-foreground">{formatDate(account.createdAt)}</td>
-              <td className="px-4 py-3">
+              {/* O menu de ações não abre o resumo (os cliques no menu não sobem até à linha). */}
+              <td
+                className="px-4 py-3"
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+              >
                 <DropdownMenu.Root>
                   <DropdownMenu.Trigger
                     aria-label={`Ações para ${account.title}`}
@@ -237,6 +246,8 @@ function AdminContas() {
           ))}
         </DataTable>
       )}
+
+      <AccountPreviewModal accountId={preview} onClose={() => setPreview(null)} />
 
       <ConfirmModal
         open={Boolean(toDelete)}

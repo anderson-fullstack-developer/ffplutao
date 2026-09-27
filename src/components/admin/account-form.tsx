@@ -510,31 +510,46 @@ export function AccountForm({ account }: { account?: AdminAccountDetail }) {
                 Arraste as imagens para mudar a ordem. A primeira é a capa do anúncio.
               </p>
             ) : null}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div
+              className="grid grid-cols-2 gap-3 sm:grid-cols-3"
+              // O destaque só se apaga ao sair da grelha inteira (não ao passar por
+              // elementos internos das miniaturas — era isso que fazia piscar).
+              onDragLeave={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragOver(null);
+              }}
+            >
               {images.map((image, index) => (
                 <div
                   key={image.publicId}
                   draggable
                   onDragStart={(e) => {
-                    setDragFrom(index);
                     e.dataTransfer.effectAllowed = "move";
                     e.dataTransfer.setData("text/plain", String(index)); // necessário no Firefox
+                    // Alterar o elemento durante o dragstart pode cancelar o arrasto no Chrome.
+                    requestAnimationFrame(() => setDragFrom(index));
+                  }}
+                  onDragEnter={(e) => {
+                    e.preventDefault();
+                    setDragOver(index);
                   }}
                   onDragOver={(e) => {
                     e.preventDefault();
                     e.dataTransfer.dropEffect = dragFrom === null ? "copy" : "move";
                     if (dragOver !== index) setDragOver(index);
                   }}
-                  onDragLeave={() => setDragOver((current) => (current === index ? null : current))}
                   onDrop={(e) => {
                     e.preventDefault();
-                    if (dragFrom !== null) reorder(dragFrom, index);
-                    else if (e.dataTransfer.files.length) void uploadFiles(e.dataTransfer.files);
+                    const raw = e.dataTransfer.getData("text/plain");
+                    const from = dragFrom ?? (/^\d+$/.test(raw) ? Number(raw) : Number.NaN);
+                    if (e.dataTransfer.files.length) void uploadFiles(e.dataTransfer.files);
+                    else if (Number.isInteger(from)) reorder(from, index);
                     endDrag();
                   }}
                   onDragEnd={endDrag}
                   className={cn(
-                    "group relative cursor-grab overflow-hidden rounded-lg border border-border transition-all active:cursor-grabbing",
+                    "group relative cursor-grab overflow-hidden rounded-lg border border-border transition-opacity active:cursor-grabbing",
+                    // Durante o arrasto os filhos não recebem eventos do rato (evita o piscar).
+                    dragFrom !== null && "**:pointer-events-none",
                     dragFrom === index && "opacity-40",
                     dragOver === index &&
                       dragFrom !== null &&
@@ -559,7 +574,7 @@ export function AccountForm({ account }: { account?: AdminAccountDetail }) {
                     </span>
                   )}
                   {index === 0 && dragOver === 0 && dragFrom !== null && dragFrom !== 0 ? (
-                    <span className="absolute inset-0 flex items-center justify-center bg-primary/25 text-xs font-bold text-foreground backdrop-blur-[1px]">
+                    <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-primary/25 p-2 text-center text-xs font-bold text-foreground">
                       Largar aqui para definir como capa
                     </span>
                   ) : null}
