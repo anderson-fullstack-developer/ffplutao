@@ -93,10 +93,15 @@
 - [ ] 29. Emails transacionais (Resend) — **nunca** enviar credenciais por email
 - [ ] 30. Recuperação de password
 
+## Extra — Páginas legais e FAQ ✅
+- [x] FAQ, Termos e Condições, Privacidade (RGPD) e Reembolsos; rodapé sem links partidos; Livro de Reclamações
+- [x] Consentimento obrigatório no pagamento (entrega imediata / perda da livre resolução), exigido pelo servidor e gravado em `orders.terms_accepted_at`
+
 ## Fase 8 — Produção
 - [ ] 31. Revisão de segurança: rate limit no login, cabeçalhos de segurança, revisão do código
 - [ ] 32. Rodar as chaves partilhadas em chat: password do Neon, `sk_live_` do Stripe, API secret do Cloudinary
 - [ ] 33. Deploy e teste completo do fluxo em produção
+- [ ] 34. Preencher os dados legais em `src/lib/legal.ts` (titular, NIF, morada, email) e rever os textos com um jurista
 
 ---
 

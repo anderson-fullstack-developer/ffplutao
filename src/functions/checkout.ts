@@ -11,6 +11,7 @@ import {
 
 const accountIdsSchema = z.object({
   accountIds: z.array(z.string().uuid()).min(1).max(MAX_CART_ITEMS),
+  acceptTerms: z.boolean(),
 });
 const groupIdSchema = z.object({ groupId: z.string().uuid() });
 
@@ -19,10 +20,10 @@ const groupIdSchema = z.object({ groupId: z.string().uuid() });
  * pagamento. Os preços vêm sempre da base de dados.
  */
 export const startCheckoutFn = createServerFn({ method: "POST" })
-  .validator((data: { accountIds: string[] }) => accountIdsSchema.parse(data))
+  .validator((data: { accountIds: string[]; acceptTerms: boolean }) => accountIdsSchema.parse(data))
   .handler(async ({ data }) => {
     const user = await requireUser();
-    return startCheckout(user, data.accountIds);
+    return startCheckout(user, data.accountIds, { acceptedTerms: data.acceptTerms });
   });
 
 /** Estado de um pagamento do próprio utilizador (confirma com o Stripe se ainda pendente). */

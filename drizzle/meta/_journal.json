@@ -43,6 +43,13 @@
       "when": 1790525411070,
       "tag": "0005_payment_intent_shared",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790526445157,
+      "tag": "0006_orders_terms_accepted",
+      "breakpoints": true
     }
   ]
 }

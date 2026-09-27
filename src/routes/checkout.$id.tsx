@@ -1,6 +1,7 @@
 import * as React from "react";
 import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { Clock, CreditCard, Loader2, Lock, ShieldCheck } from "lucide-react";
+import { CheckoutConsent } from "@/components/store/checkout-consent";
 import { StoreLayout } from "@/components/store/store-layout";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
@@ -33,6 +34,7 @@ function Checkout() {
   const { user } = Route.useRouteContext();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [accepted, setAccepted] = React.useState(false);
   const available = account.status === "AVAILABLE";
   const price = formatPrice(centsToEuros(account.priceCents));
 
@@ -40,7 +42,9 @@ function Checkout() {
     setLoading(true);
     setError(null);
     try {
-      const result = await startCheckoutFn({ data: { accountIds: [account.id] } });
+      const result = await startCheckoutFn({
+        data: { accountIds: [account.id], acceptTerms: accepted },
+      });
       if (!result.ok) {
         setError(result.error);
         setLoading(false);
@@ -94,11 +98,13 @@ function Checkout() {
               Comprador: <span className="font-semibold text-foreground">{user.email}</span>
             </p>
 
+            <CheckoutConsent checked={accepted} onChange={setAccepted} />
+
             <Button
               type="button"
               size="lg"
               className="w-full"
-              disabled={loading || !available}
+              disabled={loading || !available || !accepted}
               onClick={() => void pay()}
             >
               {loading ? (

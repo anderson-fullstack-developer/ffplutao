@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   Trash2,
 } from "lucide-react";
+import { CheckoutConsent } from "@/components/store/checkout-consent";
 import { StoreLayout } from "@/components/store/store-layout";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/ui/form-error";
@@ -35,6 +36,7 @@ function Carrinho() {
   const navigate = useNavigate();
   const [paying, setPaying] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [accepted, setAccepted] = React.useState(false);
 
   // Preço e disponibilidade SEMPRE atuais, vindos do servidor.
   const {
@@ -69,7 +71,7 @@ function Carrinho() {
     setError(null);
     try {
       const result = await startCheckoutFn({
-        data: { accountIds: available.map((account) => account.id) },
+        data: { accountIds: available.map((account) => account.id), acceptTerms: accepted },
       });
       if (!result.ok) {
         setError(result.error);
@@ -212,10 +214,12 @@ function Carrinho() {
                 </p>
               ) : null}
 
+              <CheckoutConsent checked={accepted} onChange={setAccepted} />
+
               <Button
                 size="lg"
                 className="w-full"
-                disabled={paying || isLoading || available.length === 0}
+                disabled={paying || isLoading || available.length === 0 || !accepted}
                 onClick={() => void pay()}
               >
                 {paying ? (

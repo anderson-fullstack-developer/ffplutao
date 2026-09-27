@@ -215,6 +215,8 @@ export const orders = pgTable(
     /** Partilhado pelos pedidos pagos juntos (carrinho). */
     stripePaymentIntentId: text("stripe_payment_intent_id"),
     reservationExpiresAt: timestamp("reservation_expires_at", { withTimezone: true }).notNull(),
+    /** Quando o cliente aceitou os Termos e a entrega imediata (perda da livre resolução). */
+    termsAcceptedAt: timestamp("terms_accepted_at", { withTimezone: true }),
     paidAt: timestamp("paid_at", { withTimezone: true }),
     cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
     failedAt: timestamp("failed_at", { withTimezone: true }),

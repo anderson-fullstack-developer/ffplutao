@@ -133,7 +133,16 @@ function Register() {
                   required
                   className="mt-0.5 size-4 accent-[oklch(0.82_0.165_78)]"
                 />
-                Li e concordo com os Termos e Política de Privacidade
+                <span>
+                  Li e concordo com os{" "}
+                  <Link to="/termos" target="_blank" className="text-primary hover:underline">
+                    Termos e Condições
+                  </Link>{" "}
+                  e a{" "}
+                  <Link to="/privacidade" target="_blank" className="text-primary hover:underline">
+                    Política de Privacidade
+                  </Link>
+                </span>
               </label>
               <FieldError message={fieldErrors["acceptTerms"]} />
             </div>

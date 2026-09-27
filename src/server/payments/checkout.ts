@@ -80,7 +80,16 @@ interface PreparedItem {
 export async function startCheckout(
   user: SessionUser,
   rawAccountIds: string[],
+  options: { acceptedTerms: boolean },
 ): Promise<StartCheckoutResult> {
+  // Conteúdo digital com entrega imediata: o cliente tem de aceitar os Termos e a perda
+  // do direito de livre resolução ANTES de pagar (verificado no servidor, não só no browser).
+  if (!options.acceptedTerms) {
+    return {
+      ok: false,
+      error: "Para continuar, aceite os Termos e a entrega imediata dos dados.",
+    };
+  }
   // Ordem fixa das contas = ordem fixa dos bloqueios → dois carrinhos com contas em comum
   // não se bloqueiam mutuamente (sem deadlocks).
   const accountIds = [...new Set(rawAccountIds)].filter((id) => UUID.test(id)).sort();
@@ -225,6 +234,7 @@ export async function startCheckout(
               amountCents: row.priceCents, // preço SEMPRE da base de dados
               currency: row.currency,
               reservationExpiresAt: reservedUntil,
+              termsAcceptedAt: now,
             };
           }),
         )

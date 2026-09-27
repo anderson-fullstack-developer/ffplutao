@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { BadgeCheck, LayoutGrid, ListChecks, ShoppingCart } from "lucide-react";
 import { StoreLayout } from "@/components/store/store-layout";
 import { Button } from "@/components/ui/button";
+import { FAQ } from "@/lib/faq";
 
 export const Route = createFileRoute("/como-funciona")({
   head: () => ({
@@ -22,39 +23,26 @@ const steps = [
   {
     icon: LayoutGrid,
     title: "Escolha uma conta",
-    text: "Explore o catálogo, use os filtros por preço, level, servidor e características e compare opções.",
+    text: "Explore o catálogo e filtre por preço, nível, servidor e características. Pode comprar uma conta ou juntar várias no carrinho.",
   },
   {
     icon: ListChecks,
     title: "Confira os detalhes",
-    text: "Cada anúncio mostra skins, level, região, armas evolutivas, emotes e passes antigos.",
+    text: "Cada anúncio mostra screenshots, nível, servidor, skins, armas evolutivas, emotes e passes antigos.",
   },
   {
     icon: ShoppingCart,
-    title: "Realize a compra",
-    text: "Um checkout simples e direto, com o resumo do pedido sempre visível.",
+    title: "Pague em segurança",
+    text: "Cartão, Apple Pay ou Google Pay numa página de pagamento segura. As contas ficam reservadas para si durante o pagamento.",
   },
   {
     icon: BadgeCheck,
-    title: "Acesse sua compra",
-    text: "Os dados da conta ficam disponíveis na sua área de cliente, protegidos até você revelar.",
+    title: "Receba os dados na hora",
+    text: 'Logo após a confirmação, abra "Minhas compras" e carregue em "Revelar dados" para ver o login e a senha da conta.',
   },
 ];
 
-const faq = [
-  {
-    q: "Os dados da conta aparecem antes da compra?",
-    a: "Não. Os dados privados só são exibidos na sua área de compras depois da confirmação.",
-  },
-  {
-    q: "Posso falar com alguém antes de comprar?",
-    a: "Sim. Em cada conta existe um botão para falar com o suporte.",
-  },
-  {
-    q: "Que moeda é usada?",
-    a: "Todos os preços são apresentados em euros (€).",
-  },
-];
+const faq = FAQ.flatMap((group) => group.items).slice(0, 6);
 
 function ComoFunciona() {
   return (
@@ -81,7 +69,7 @@ function ComoFunciona() {
         </ol>
 
         <h2 className="font-display mt-16 text-2xl font-extrabold">Perguntas frequentes</h2>
-        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+        <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {faq.map((item) => (
             <div key={item.q} className="surface-panel p-6">
               <h3 className="font-bold">{item.q}</h3>
@@ -95,7 +83,10 @@ function ComoFunciona() {
             <Link to="/contas">Ver contas</Link>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link to="/suporte">Falar com suporte</Link>
+            <Link to="/faq">Todas as perguntas</Link>
+          </Button>
+          <Button asChild size="lg" variant="ghost">
+            <Link to="/suporte">Falar com o suporte</Link>
           </Button>
         </div>
       </div>

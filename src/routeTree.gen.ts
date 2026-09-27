@@ -14,9 +14,13 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as CarrinhoRouteImport } from './routes/carrinho'
 import { Route as ComoFuncionaRouteImport } from './routes/como-funciona'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as ReembolsosRouteImport } from './routes/reembolsos'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as SuporteRouteImport } from './routes/suporte'
+import { Route as TermosRouteImport } from './routes/termos'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminClientesRouteImport } from './routes/admin/clientes'
 import { Route as AdminPedidosRouteImport } from './routes/admin/pedidos'
@@ -64,9 +68,24 @@ const DashboardRouteRoute = DashboardRouteRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReembolsosRoute = ReembolsosRouteImport.update({
+  id: '/reembolsos',
+  path: '/reembolsos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -77,6 +96,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const SuporteRoute = SuporteRouteImport.update({
   id: '/suporte',
   path: '/suporte',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermosRoute = TermosRouteImport.update({
+  id: '/termos',
+  path: '/termos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -191,9 +215,13 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/carrinho': typeof CarrinhoRoute
   '/como-funciona': typeof ComoFuncionaRoute
+  '/faq': typeof FaqRoute
   '/login': typeof LoginRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/reembolsos': typeof ReembolsosRoute
   '/register': typeof RegisterRoute
   '/suporte': typeof SuporteRoute
+  '/termos': typeof TermosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/checkout/$id': typeof CheckoutIdRoute
@@ -220,9 +248,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/carrinho': typeof CarrinhoRoute
   '/como-funciona': typeof ComoFuncionaRoute
+  '/faq': typeof FaqRoute
   '/login': typeof LoginRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/reembolsos': typeof ReembolsosRoute
   '/register': typeof RegisterRoute
   '/suporte': typeof SuporteRoute
+  '/termos': typeof TermosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/checkout/$id': typeof CheckoutIdRoute
@@ -252,9 +284,13 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/carrinho': typeof CarrinhoRoute
   '/como-funciona': typeof ComoFuncionaRoute
+  '/faq': typeof FaqRoute
   '/login': typeof LoginRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/reembolsos': typeof ReembolsosRoute
   '/register': typeof RegisterRoute
   '/suporte': typeof SuporteRoute
+  '/termos': typeof TermosRoute
   '/admin/clientes': typeof AdminClientesRoute
   '/admin/pedidos': typeof AdminPedidosRoute
   '/checkout/$id': typeof CheckoutIdRoute
@@ -285,9 +321,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/carrinho'
     | '/como-funciona'
+    | '/faq'
     | '/login'
+    | '/privacidade'
+    | '/reembolsos'
     | '/register'
     | '/suporte'
+    | '/termos'
     | '/admin/clientes'
     | '/admin/pedidos'
     | '/checkout/$id'
@@ -314,9 +354,13 @@ export interface FileRouteTypes {
     | '/'
     | '/carrinho'
     | '/como-funciona'
+    | '/faq'
     | '/login'
+    | '/privacidade'
+    | '/reembolsos'
     | '/register'
     | '/suporte'
+    | '/termos'
     | '/admin/clientes'
     | '/admin/pedidos'
     | '/checkout/$id'
@@ -345,9 +389,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/carrinho'
     | '/como-funciona'
+    | '/faq'
     | '/login'
+    | '/privacidade'
+    | '/reembolsos'
     | '/register'
     | '/suporte'
+    | '/termos'
     | '/admin/clientes'
     | '/admin/pedidos'
     | '/checkout/$id'
@@ -377,9 +425,13 @@ export interface RootRouteChildren {
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   CarrinhoRoute: typeof CarrinhoRoute
   ComoFuncionaRoute: typeof ComoFuncionaRoute
+  FaqRoute: typeof FaqRoute
   LoginRoute: typeof LoginRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
+  ReembolsosRoute: typeof ReembolsosRoute
   RegisterRoute: typeof RegisterRoute
   SuporteRoute: typeof SuporteRoute
+  TermosRoute: typeof TermosRoute
   CheckoutIdRoute: typeof CheckoutIdRoute
   CompraCanceladaRoute: typeof CompraCanceladaRoute
   CompraSucessoRoute: typeof CompraSucessoRoute
@@ -426,11 +478,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reembolsos': {
+      id: '/reembolsos'
+      path: '/reembolsos'
+      fullPath: '/reembolsos'
+      preLoaderRoute: typeof ReembolsosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -445,6 +518,13 @@ declare module '@tanstack/react-router' {
       path: '/suporte'
       fullPath: '/suporte'
       preLoaderRoute: typeof SuporteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/termos': {
+      id: '/termos'
+      path: '/termos'
+      fullPath: '/termos'
+      preLoaderRoute: typeof TermosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -651,9 +731,13 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   CarrinhoRoute: CarrinhoRoute,
   ComoFuncionaRoute: ComoFuncionaRoute,
+  FaqRoute: FaqRoute,
   LoginRoute: LoginRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
+  ReembolsosRoute: ReembolsosRoute,
   RegisterRoute: RegisterRoute,
   SuporteRoute: SuporteRoute,
+  TermosRoute: TermosRoute,
   CheckoutIdRoute: CheckoutIdRoute,
   CompraCanceladaRoute: CompraCanceladaRoute,
   CompraSucessoRoute: CompraSucessoRoute,
