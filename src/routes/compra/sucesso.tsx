@@ -5,16 +5,18 @@ import { AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { StoreLayout } from "@/components/store/store-layout";
 import { Button } from "@/components/ui/button";
-import { getOrderStatusFn } from "@/functions/checkout";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { getCheckoutStatusFn } from "@/functions/checkout";
+import { useCart } from "@/lib/cart";
 import { centsToEuros } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
 
 /**
- * Página de regresso do Stripe. NÃO confirma nada por si: pergunta ao servidor, que só
- * considera o pedido pago com dados vindos do Stripe (webhook ou consulta com a chave secreta).
+ * Página de regresso do pagamento. NÃO confirma nada por si: pergunta ao servidor, que só
+ * considera o pagamento feito com dados vindos do processador de pagamentos.
  */
 export const Route = createFileRoute("/compra/sucesso")({
-  validateSearch: z.object({ pedido: z.string().uuid().optional().catch(undefined) }),
+  validateSearch: z.object({ grupo: z.string().uuid().optional().catch(undefined) }),
   beforeLoad: ({ context, location }) => {
     if (!context.user) throw redirect({ to: "/login", search: { redirect: location.href } });
   },
@@ -27,30 +29,39 @@ export const Route = createFileRoute("/compra/sucesso")({
 const MAX_WAIT_MS = 2 * 60 * 1000;
 
 function Sucesso() {
-  const { pedido } = Route.useSearch();
+  const { grupo } = Route.useSearch();
+  const cart = useCart();
   const [startedAt] = React.useState(() => Date.now());
 
-  const { data: order, isLoading } = useQuery({
-    queryKey: ["order-status", pedido],
-    queryFn: () => getOrderStatusFn({ data: { orderId: pedido! } }),
-    enabled: Boolean(pedido),
+  const { data: checkout, isLoading } = useQuery({
+    queryKey: ["checkout-status", grupo],
+    queryFn: () => getCheckoutStatusFn({ data: { groupId: grupo! } }),
+    enabled: Boolean(grupo),
     refetchInterval: (query) =>
       query.state.data?.status === "PENDING" && Date.now() - startedAt < MAX_WAIT_MS ? 2500 : false,
   });
 
-  const waitedTooLong = order?.status === "PENDING" && Date.now() - startedAt >= MAX_WAIT_MS;
+  // Contas pagas saem do carrinho.
+  React.useEffect(() => {
+    if (!checkout || checkout.status === "PENDING") return;
+    const bought = checkout.items.filter((i) => i.status === "PAID").map((i) => i.accountId);
+    if (bought.some((id) => cart.has(id))) cart.removeMany(bought);
+  }, [checkout, cart]);
+
+  const waitedTooLong = checkout?.status === "PENDING" && Date.now() - startedAt >= MAX_WAIT_MS;
+  const paidCount = checkout?.items.filter((i) => i.status === "PAID").length ?? 0;
 
   let content: React.ReactNode;
-  if (!pedido || (!isLoading && !order)) {
+  if (!grupo || (!isLoading && !checkout)) {
     content = (
       <Status
         icon={<AlertTriangle className="size-9" />}
         tone="warning"
-        title="Pedido não encontrado"
+        title="Pagamento não encontrado"
         text="Consulte as suas compras na área de cliente."
       />
     );
-  } else if (isLoading || !order || order.status === "PENDING") {
+  } else if (isLoading || !checkout || checkout.status === "PENDING") {
     content = (
       <Status
         icon={<Loader2 className="size-9 animate-spin" />}
@@ -63,13 +74,26 @@ function Sucesso() {
         }
       />
     );
-  } else if (order.status === "PAID") {
+  } else if (checkout.status === "PAID") {
     content = (
       <Status
         icon={<CheckCircle2 className="size-9" />}
         tone="success"
         title="Compra concluída!"
-        text="Os dados da conta já estão disponíveis na sua área de cliente."
+        text={
+          paidCount > 1
+            ? "Os dados das contas já estão disponíveis na sua área de cliente."
+            : "Os dados da conta já estão disponíveis na sua área de cliente."
+        }
+      />
+    );
+  } else if (checkout.status === "PARTIAL") {
+    content = (
+      <Status
+        icon={<CheckCircle2 className="size-9" />}
+        tone="success"
+        title="Compra concluída (em parte)"
+        text="Uma ou mais contas foram vendidas a outra pessoa antes da confirmação. O valor dessas contas foi devolvido automaticamente ao seu cartão; as restantes já são suas."
       />
     );
   } else {
@@ -77,10 +101,10 @@ function Sucesso() {
       <Status
         icon={<AlertTriangle className="size-9" />}
         tone="warning"
-        title={order.status === "REFUNDED" ? "Pagamento reembolsado" : "Pagamento não concluído"}
+        title={checkout.status === "REFUNDED" ? "Pagamento devolvido" : "Pagamento não concluído"}
         text={
-          order.status === "REFUNDED"
-            ? "A conta deixou de estar disponível antes da confirmação. O valor foi reembolsado automaticamente para o seu cartão."
+          checkout.status === "REFUNDED"
+            ? "As contas deixaram de estar disponíveis antes da confirmação. O valor foi devolvido automaticamente ao seu cartão."
             : "O pagamento não foi concluído e nada foi cobrado. Pode tentar novamente."
         }
       />
@@ -93,23 +117,33 @@ function Sucesso() {
         <div className="surface-panel animate-scale-in w-full max-w-lg p-8 text-center">
           {content}
 
-          {order ? (
-            <dl className="mt-8 space-y-2 rounded-xl border border-border bg-surface/50 p-5 text-left text-sm">
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Pedido</dt>
-                <dd className="font-semibold">{order.reference}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">Conta</dt>
-                <dd className="text-right">{order.accountTitle}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Valor</dt>
-                <dd className="gold-text font-bold">
-                  {formatPrice(centsToEuros(order.amountCents))}
-                </dd>
-              </div>
-            </dl>
+          {checkout ? (
+            <div className="mt-8 rounded-xl border border-border bg-surface/50 p-5 text-left text-sm">
+              <ul className="space-y-3">
+                {checkout.items.map((item) => (
+                  <li key={item.id} className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold">{item.accountTitle}</p>
+                      <p className="text-xs text-muted-foreground">Pedido {item.reference}</p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <span className="font-semibold">
+                        {formatPrice(centsToEuros(item.amountCents))}
+                      </span>
+                      {checkout.status !== "PENDING" ? <StatusBadge status={item.status} /> : null}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              {checkout.items.length > 1 ? (
+                <div className="mt-4 flex justify-between border-t border-border pt-3 font-bold">
+                  <span>Total</span>
+                  <span className="gold-text">
+                    {formatPrice(centsToEuros(checkout.totalCents))}
+                  </span>
+                </div>
+              ) : null}
+            </div>
           ) : null}
 
           <div className="mt-8 grid gap-3 sm:grid-cols-2">

@@ -40,7 +40,7 @@ function Checkout() {
     setLoading(true);
     setError(null);
     try {
-      const result = await startCheckoutFn({ data: { accountId: account.id } });
+      const result = await startCheckoutFn({ data: { accountIds: [account.id] } });
       if (!result.ok) {
         setError(result.error);
         setLoading(false);

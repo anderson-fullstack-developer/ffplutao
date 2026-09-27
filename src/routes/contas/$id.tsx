@@ -18,6 +18,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { AddToCartButton } from "@/components/store/add-to-cart-button";
 import { StoreLayout } from "@/components/store/store-layout";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -174,11 +175,14 @@ function AccountDetail() {
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
               {account.status === "AVAILABLE" ? (
-                <Button asChild size="lg" className="sm:col-span-2">
-                  <Link to="/checkout/$id" params={{ id: account.id }}>
-                    Comprar agora
-                  </Link>
-                </Button>
+                <>
+                  <Button asChild size="lg">
+                    <Link to="/checkout/$id" params={{ id: account.id }}>
+                      Comprar agora
+                    </Link>
+                  </Button>
+                  <AddToCartButton accountId={account.id} title={account.title} />
+                </>
               ) : (
                 <Button size="lg" className="sm:col-span-2" disabled>
                   {account.status === "SOLD"

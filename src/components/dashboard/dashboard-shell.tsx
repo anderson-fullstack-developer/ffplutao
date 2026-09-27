@@ -29,7 +29,7 @@ export function DashboardShell({
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
-      <div className="ember-bg flex-1 pt-16">
+      <div className="ember-bg flex-1 pt-16 md:pt-24">
         <div className="mx-auto flex max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:py-12">
           <aside className="hidden w-60 shrink-0 lg:block">
             <SidebarNav onSignOut={signOut} />

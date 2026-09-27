@@ -209,8 +209,11 @@ export const orders = pgTable(
     currency: char("currency", { length: 3 }).notNull().default("EUR"),
     status: orderStatus("status").notNull().default("PENDING"),
     paymentProvider: text("payment_provider").notNull().default("stripe"),
-    stripeCheckoutSessionId: text("stripe_checkout_session_id").unique(),
-    stripePaymentIntentId: text("stripe_payment_intent_id").unique(),
+    /** Pedidos pagos juntos (carrinho) partilham o mesmo grupo e a mesma sessão de pagamento. */
+    checkoutGroupId: uuid("checkout_group_id").notNull().defaultRandom(),
+    stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+    /** Partilhado pelos pedidos pagos juntos (carrinho). */
+    stripePaymentIntentId: text("stripe_payment_intent_id"),
     reservationExpiresAt: timestamp("reservation_expires_at", { withTimezone: true }).notNull(),
     paidAt: timestamp("paid_at", { withTimezone: true }),
     cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
@@ -232,6 +235,9 @@ export const orders = pgTable(
       .where(sql`${t.status} = 'PENDING'`),
     index("orders_user_created_idx").on(t.userId, t.createdAt),
     index("orders_status_created_idx").on(t.status, t.createdAt),
+    index("orders_checkout_group_idx").on(t.checkoutGroupId),
+    index("orders_stripe_session_idx").on(t.stripeCheckoutSessionId),
+    index("orders_stripe_payment_intent_idx").on(t.stripePaymentIntentId),
   ],
 );
 

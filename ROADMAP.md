@@ -72,6 +72,13 @@
 
 **Falta (antes do lançamento):** uma compra real de ponta a ponta com cartão; em produção criar o endpoint do webhook no painel Stripe (eventos: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired`, `charge.refunded`) e pôr o `whsec_` na Vercel. Localmente o `STRIPE_WEBHOOK_SECRET` é um segredo de desenvolvimento.
 
+## Extra — Carrinho e navegação ✅
+- [x] Barra de navegação nova: faixa de confiança, menu "Contas" (preço/servidor), pesquisa, carrinho com contador, "Minhas compras"
+- [x] Carrinho no browser (até 10 contas; não reserva nada até "Pagar"; sobrevive ao login/registo)
+- [x] Um pagamento para várias contas: 1 pedido por conta com o mesmo `checkout_group_id` e a mesma sessão; reserva tudo-ou-nada com bloqueios por ordem fixa (sem deadlocks)
+- [x] Conta vendida a outra pessoa antes da confirmação → só essa é reembolsada (reembolso parcial); valor adulterado → nada entregue
+- [x] 35 testes com a API real do Stripe, incluindo 6 carrinhos sobrepostos em simultâneo
+
 ## Fase 6 — Entrega das credenciais
 - [ ] 25. "Minhas Compras" mostra só os pedidos do próprio utilizador
 - [ ] 26. `GET /orders/:id/credentials`: verifica sessão → dono → `PAID` → `SOLD`; desencripta; regista em `credential_access_logs`

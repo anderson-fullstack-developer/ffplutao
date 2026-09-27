@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "../db/client";
 import { stripeEvents } from "../db/schema";
 import { serverEnv } from "../env";
-import { markOrderPaid, markRefunded, markSessionClosed } from "./checkout";
+import { markCheckoutPaid, markRefunded, markSessionClosed } from "./checkout";
 import { getStripe, type Stripe } from "./stripe";
 
 /**
@@ -47,7 +47,7 @@ async function processEvent(event: Stripe.Event) {
   switch (event.type) {
     case "checkout.session.completed":
     case "checkout.session.async_payment_succeeded":
-      await markOrderPaid(event.data.object);
+      await markCheckoutPaid(event.data.object);
       break;
     case "checkout.session.async_payment_failed":
       await markSessionClosed(event.data.object, "FAILED");

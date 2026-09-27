@@ -4,6 +4,7 @@ import { centsToEuros, type PublicAccount } from "@/lib/catalog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PriceDisplay } from "@/components/ui/misc";
 import { Button } from "@/components/ui/button";
+import { AddToCartButton } from "@/components/store/add-to-cart-button";
 
 export function AccountCard({ account }: { account: PublicAccount }) {
   const cover = account.images[0];
@@ -57,11 +58,16 @@ export function AccountCard({ account }: { account: PublicAccount }) {
             <p className="text-xs text-muted-foreground">Preço</p>
             <PriceDisplay value={centsToEuros(account.priceCents)} />
           </div>
-          <Button asChild size="sm">
-            <Link to="/contas/$id" params={{ id: account.id }}>
-              Ver conta
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            {account.status === "AVAILABLE" ? (
+              <AddToCartButton accountId={account.id} title={account.title} size="sm" compact />
+            ) : null}
+            <Button asChild size="sm">
+              <Link to="/contas/$id" params={{ id: account.id }}>
+                Ver conta
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
     </article>

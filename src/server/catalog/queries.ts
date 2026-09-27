@@ -245,6 +245,26 @@ export async function getFeatured(limit = 8): Promise<{
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** Contas do carrinho (dados públicos + estado atual). Ids desconhecidos/ocultos são omitidos. */
+export async function getCartAccounts(ids: string[]): Promise<PublicAccount[]> {
+  const valid = [...new Set(ids)].filter((id) => UUID.test(id)).slice(0, 20);
+  if (valid.length === 0) return [];
+  const rows = await getDb()
+    .select(publicColumns)
+    .from(accounts)
+    .where(and(inArray(accounts.id, valid), visibleOnDetail));
+  const images = await imagesFor(
+    rows.map((row) => row.id),
+    true,
+  );
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  // Mantém a ordem em que o cliente adicionou as contas.
+  return valid.flatMap((id) => {
+    const row = byId.get(id);
+    return row ? [toPublicAccount(row, images.get(id) ?? [])] : [];
+  });
+}
+
 export async function getPublicAccount(id: string): Promise<PublicAccount | null> {
   if (!UUID.test(id)) return null;
 
