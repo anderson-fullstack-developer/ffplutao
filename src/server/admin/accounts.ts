@@ -32,13 +32,24 @@ class ValidationFailure extends Error {
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LOCKED: AccountStatus[] = ["RESERVED", "SOLD"];
 
+function reservationExpired(row: { status: string; reservedUntil: Date | null }) {
+  return (
+    row.status === "RESERVED" &&
+    (row.reservedUntil === null || row.reservedUntil.getTime() <= Date.now())
+  );
+}
+
 export async function listAdminAccounts(filters: {
   q?: string | undefined;
   status?: AccountStatus | undefined;
 }): Promise<AdminAccountRow[]> {
   const db = getDb();
   const conditions: SQL[] = [];
-  if (filters.status) conditions.push(eq(accounts.status, filters.status));
+  // Estado REAL: uma reserva expirada (cliente abandonou o pagamento) conta como disponível.
+  const effectiveStatus = sql<AccountStatus>`case
+    when ${accounts.status} = 'RESERVED' and ${accounts.reservedUntil} <= now() then 'AVAILABLE'
+    else ${accounts.status}::text end`;
+  if (filters.status) conditions.push(sql`${effectiveStatus} = ${filters.status}`);
   if (filters.q) {
     const pattern = `%${filters.q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
     conditions.push(sql`${accounts.title} ilike ${pattern}`);
@@ -66,7 +77,7 @@ export async function listAdminAccounts(filters: {
       level: accounts.level,
       server: accounts.server,
       priceCents: accounts.priceCents,
-      status: accounts.status,
+      status: effectiveStatus,
       featured: accounts.featured,
       createdAt: accounts.createdAt,
       coverUrl: cover,
@@ -122,8 +133,9 @@ export async function getAdminAccount(id: string): Promise<AdminAccountDetail | 
     observations: row.observations,
     adminNotes: row.adminNotes,
     featured: row.featured,
-    status: row.status,
-    reservedUntil: row.reservedUntil?.toISOString() ?? null,
+    // Reserva expirada = disponível (o cliente abandonou o pagamento).
+    status: reservationExpired(row) ? "AVAILABLE" : row.status,
+    reservedUntil: reservationExpired(row) ? null : (row.reservedUntil?.toISOString() ?? null),
     images,
     hasCredentials: Boolean(creds),
     ordersCount: ordersRow?.n ?? 0,
@@ -307,13 +319,18 @@ export async function updateAccount(
     await getDb().transaction(async (tx) => {
       // Bloqueia a linha: o checkout não pode reservar a meio desta edição.
       const [current] = await tx
-        .select({ status: accounts.status, priceCents: accounts.priceCents })
+        .select({
+          status: accounts.status,
+          priceCents: accounts.priceCents,
+          reservedUntil: accounts.reservedUntil,
+        })
         .from(accounts)
         .where(eq(accounts.id, id))
         .for("update");
       if (!current) throw new ValidationFailure("Conta não encontrada.");
 
-      const locked = LOCKED.includes(current.status);
+      // Bloqueada: vendida, ou com um checkout AINDA a decorrer (reserva não expirada).
+      const locked = LOCKED.includes(current.status) && !reservationExpired(current);
       if (locked && data.priceCents !== current.priceCents) {
         throw new ValidationFailure(
           "Não é possível alterar o preço de uma conta reservada ou vendida.",
@@ -337,7 +354,7 @@ export async function updateAccount(
         .set({
           ...publicFields(data),
           // RESERVED/SOLD nunca são alterados pelo admin.
-          ...(locked ? {} : { status: data.status }),
+          ...(locked ? {} : { status: data.status, reservedUntil: null }),
           ...(!locked && data.status === "AVAILABLE"
             ? { publishedAt: sql`coalesce(${accounts.publishedAt}, now())` }
             : {}),
