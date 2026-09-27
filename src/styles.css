@@ -1,0 +1,155 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Plutão Shop design system — dark premium gamer.
+ * Preto / cinza muito escuro + dourado e laranja.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-glow: var(--primary-glow);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-display: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --radius: 0.875rem;
+  --background: oklch(0.145 0.006 60);
+  --foreground: oklch(0.975 0.004 90);
+  --surface: oklch(0.185 0.008 65);
+  --surface-2: oklch(0.225 0.01 70);
+  --card: oklch(0.195 0.009 68);
+  --card-foreground: oklch(0.975 0.004 90);
+  --popover: oklch(0.2 0.009 68);
+  --popover-foreground: oklch(0.975 0.004 90);
+  --primary: oklch(0.82 0.165 78);
+  --primary-foreground: oklch(0.16 0.02 60);
+  --primary-glow: oklch(0.72 0.19 52);
+  --secondary: oklch(0.26 0.012 70);
+  --secondary-foreground: oklch(0.96 0.004 90);
+  --muted: oklch(0.24 0.01 70);
+  --muted-foreground: oklch(0.7 0.012 80);
+  --accent: oklch(0.72 0.19 52);
+  --accent-foreground: oklch(0.16 0.02 60);
+  --destructive: oklch(0.6 0.2 25);
+  --destructive-foreground: oklch(0.98 0.004 90);
+  --success: oklch(0.72 0.17 152);
+  --warning: oklch(0.82 0.16 85);
+  --border: oklch(0.3 0.012 72);
+  --input: oklch(0.28 0.012 72);
+  --ring: oklch(0.82 0.165 78);
+
+  --gradient-gold: linear-gradient(135deg, var(--primary), var(--primary-glow));
+  --gradient-surface: linear-gradient(
+    160deg,
+    color-mix(in oklab, var(--surface) 92%, transparent),
+    color-mix(in oklab, var(--background) 96%, transparent)
+  );
+  --shadow-glow: 0 10px 40px -12px color-mix(in oklab, var(--primary) 55%, transparent);
+  --shadow-card: 0 18px 40px -24px oklch(0 0 0 / 0.9);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 40%, transparent);
+  }
+}
+
+@utility surface-panel {
+  background-image: var(--gradient-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+@utility gold-text {
+  background-image: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility gold-surface {
+  background-image: var(--gradient-gold);
+  color: var(--color-primary-foreground);
+}
+
+@utility glow-cta {
+  box-shadow: var(--shadow-glow);
+}
+
+@utility ember-bg {
+  background:
+    radial-gradient(
+      60% 50% at 80% 0%,
+      color-mix(in oklab, var(--primary-glow) 22%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 40% at 10% 10%,
+      color-mix(in oklab, var(--primary) 12%, transparent),
+      transparent 70%
+    );
+}
+
+@utility hide-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
