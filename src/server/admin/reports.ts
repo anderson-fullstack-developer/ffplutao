@@ -28,6 +28,12 @@ async function selectOrders(where: SQL | undefined, limit: number): Promise<Admi
       createdAt: orders.createdAt,
       paidAt: orders.paidAt,
       refundedAt: orders.refundedAt,
+      credentialViews: sql<number>`(
+        select count(*)::int from credential_access_logs cal where cal.order_id = ${orders.id}
+      )`,
+      lastCredentialViewAt: sql<string | null>`(
+        select max(cal.created_at) from credential_access_logs cal where cal.order_id = ${orders.id}
+      )`,
     })
     .from(orders)
     .innerJoin(users, eq(orders.userId, users.id))
@@ -44,6 +50,9 @@ async function selectOrders(where: SQL | undefined, limit: number): Promise<Admi
     createdAt: row.createdAt.toISOString(),
     paidAt: row.paidAt?.toISOString() ?? null,
     refundedAt: row.refundedAt?.toISOString() ?? null,
+    lastCredentialViewAt: row.lastCredentialViewAt
+      ? new Date(row.lastCredentialViewAt).toISOString()
+      : null,
   }));
 }
 

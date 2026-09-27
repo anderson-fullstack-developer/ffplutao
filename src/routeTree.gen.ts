@@ -37,6 +37,7 @@ import { Route as DashboardComprasIdRouteImport } from './routes/dashboard/compr
 import { Route as DashboardSuporteIndexRouteImport } from './routes/dashboard/suporte/index'
 import { Route as DashboardSuporteIdRouteImport } from './routes/dashboard/suporte/$id'
 import { Route as AdminContasIdEditarRouteImport } from './routes/admin/contas/$id.editar'
+import { Route as ApiOrdersIdCredentialsRouteImport } from './routes/api/orders/$id/credentials'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -178,6 +179,11 @@ const AdminContasIdEditarRoute = AdminContasIdEditarRouteImport.update({
   path: '/contas/$id/editar',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const ApiOrdersIdCredentialsRoute = ApiOrdersIdCredentialsRouteImport.update({
+  id: '/api/orders/$id/credentials',
+  path: '/api/orders/$id/credentials',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/compras/': typeof DashboardComprasIndexRoute
   '/dashboard/suporte/': typeof DashboardSuporteIndexRoute
   '/admin/contas/$id/editar': typeof AdminContasIdEditarRoute
+  '/api/orders/$id/credentials': typeof ApiOrdersIdCredentialsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -236,6 +243,7 @@ export interface FileRoutesByTo {
   '/dashboard/compras': typeof DashboardComprasIndexRoute
   '/dashboard/suporte': typeof DashboardSuporteIndexRoute
   '/admin/contas/$id/editar': typeof AdminContasIdEditarRoute
+  '/api/orders/$id/credentials': typeof ApiOrdersIdCredentialsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -267,6 +275,7 @@ export interface FileRoutesById {
   '/dashboard/compras/': typeof DashboardComprasIndexRoute
   '/dashboard/suporte/': typeof DashboardSuporteIndexRoute
   '/admin/contas/$id/editar': typeof AdminContasIdEditarRoute
+  '/api/orders/$id/credentials': typeof ApiOrdersIdCredentialsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -299,6 +308,7 @@ export interface FileRouteTypes {
     | '/dashboard/compras/'
     | '/dashboard/suporte/'
     | '/admin/contas/$id/editar'
+    | '/api/orders/$id/credentials'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -327,6 +337,7 @@ export interface FileRouteTypes {
     | '/dashboard/compras'
     | '/dashboard/suporte'
     | '/admin/contas/$id/editar'
+    | '/api/orders/$id/credentials'
   id:
     | '__root__'
     | '/'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/dashboard/compras/'
     | '/dashboard/suporte/'
     | '/admin/contas/$id/editar'
+    | '/api/orders/$id/credentials'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -374,6 +386,7 @@ export interface RootRouteChildren {
   ContasIdRoute: typeof ContasIdRoute
   ContasIndexRoute: typeof ContasIndexRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
+  ApiOrdersIdCredentialsRoute: typeof ApiOrdersIdCredentialsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -574,6 +587,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContasIdEditarRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/api/orders/$id/credentials': {
+      id: '/api/orders/$id/credentials'
+      path: '/api/orders/$id/credentials'
+      fullPath: '/api/orders/$id/credentials'
+      preLoaderRoute: typeof ApiOrdersIdCredentialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -640,6 +660,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContasIdRoute: ContasIdRoute,
   ContasIndexRoute: ContasIndexRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
+  ApiOrdersIdCredentialsRoute: ApiOrdersIdCredentialsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

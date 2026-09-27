@@ -150,6 +150,9 @@ export interface AdminOrderRow {
   createdAt: string;
   paidAt: string | null;
   refundedAt: string | null;
+  /** Quantas vezes o cliente revelou os dados da conta (prova de entrega). */
+  credentialViews: number;
+  lastCredentialViewAt: string | null;
 }
 
 export interface AdminCustomerRow {

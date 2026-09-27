@@ -79,10 +79,12 @@
 - [x] Conta vendida a outra pessoa antes da confirmação → só essa é reembolsada (reembolso parcial); valor adulterado → nada entregue
 - [x] 35 testes com a API real do Stripe, incluindo 6 carrinhos sobrepostos em simultâneo
 
-## Fase 6 — Entrega das credenciais
-- [ ] 25. "Minhas Compras" mostra só os pedidos do próprio utilizador
-- [ ] 26. `GET /orders/:id/credentials`: verifica sessão → dono → `PAID` → `SOLD`; desencripta; regista em `credential_access_logs`
-- [ ] 27. Tirar `credentials` do tipo `Order` no frontend — só chegam ao clicar "Revelar dados"
+## Fase 6 — Entrega das credenciais ✅
+- [x] 25. "Minhas compras" e "Visão geral" com dados reais, só do próprio utilizador (checkouts cancelados não aparecem)
+- [x] 26. `GET /api/orders/:id/credentials`: 401 sem sessão · 404 inexistente · 403 de outra pessoa · 409 não pago/não vendido; desencripta; regista em `credential_access_logs` (IP + browser); `Cache-Control: no-store`. Admin vê "Dados vistos pelo cliente: N×"
+- [x] 27. Dados de demonstração (`src/mock`, `src/types`) apagados; a senha nunca vai no HTML — só ao clicar "Revelar dados"
+
+**Verificado:** 23 testes da viagem completa (admin publica → cliente compra carrinho → pagamento confirmado → dados exatos entregues) + ataques (403/401/404, HTML sem senha).
 
 **Teste:** o utilizador B pede as credenciais do pedido do utilizador A → **403**.
 
@@ -104,4 +106,4 @@
 - [x] `/compra/sucesso`: estado **"A confirmar pagamento…"** antes de "Compra concluída" (Fase 5)
 - [x] Badges: acrescentar **Rascunho**, **Desativada**, **Falhado** (Fase 3)
 - [x] Remover o botão "Continuar com Google" do login, até haver decisão sobre login social (Fase 2)
-- [ ] Tirar `credentials` do tipo `Order` do frontend (Fase 6)
+- [x] Tirar `credentials` do tipo `Order` do frontend (Fase 6)

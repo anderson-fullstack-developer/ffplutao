@@ -12,7 +12,7 @@ import { EmptyState } from "@/components/ui/misc";
 import { listAdminOrdersFn, refundOrderFn } from "@/functions/admin";
 import type { AdminOrderRow, OrderStatus } from "@/lib/admin";
 import { centsToEuros } from "@/lib/catalog";
-import { formatDate, formatPrice } from "@/lib/format";
+import { formatDate, formatDateTime, formatPrice } from "@/lib/format";
 
 const statusValues = ["PENDING", "PAID", "CANCELLED", "FAILED", "REFUNDED"] as const;
 
@@ -166,6 +166,16 @@ function AdminPedidos() {
             <Row label="Criado" value={formatDate(selected.createdAt)} />
             <Row label="Pagamento" value="Cartão" />
             <Row label="Pago" value={selected.paidAt ? formatDate(selected.paidAt) : "—"} />
+            {selected.status === "PAID" ? (
+              <Row
+                label="Dados vistos pelo cliente"
+                value={
+                  selected.credentialViews
+                    ? `${selected.credentialViews}× · última ${formatDateTime(selected.lastCredentialViewAt!)}`
+                    : "Ainda não"
+                }
+              />
+            ) : null}
             {selected.refundedAt ? (
               <Row label="Devolvido" value={formatDate(selected.refundedAt)} />
             ) : null}
