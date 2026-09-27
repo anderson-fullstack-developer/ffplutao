@@ -1,16 +1,28 @@
 import * as React from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Search, SlidersHorizontal, PackageSearch } from "lucide-react";
+import { createFileRoute, useRouterState } from "@tanstack/react-router";
+import { ChevronLeft, ChevronRight, PackageSearch, Search, SlidersHorizontal } from "lucide-react";
 import { StoreLayout } from "@/components/store/store-layout";
 import { AccountGrid } from "@/components/store/account-card";
 import { Button } from "@/components/ui/button";
 import { Input, Select, Label } from "@/components/ui/field";
-import { EmptyState, AccountCardSkeleton } from "@/components/ui/misc";
+import { EmptyState } from "@/components/ui/misc";
 import { Modal } from "@/components/ui/confirm-modal";
-import { accounts } from "@/mock/accounts";
-import type { Account } from "@/types";
+import { listCatalogFn } from "@/functions/catalog";
+import {
+  FEATURES,
+  LEVEL_RANGES,
+  PRICE_RANGES,
+  SERVERS,
+  SORTS,
+  catalogSearchSchema,
+  type CatalogSearch,
+} from "@/lib/catalog";
+import { cn } from "@/lib/format";
 
 export const Route = createFileRoute("/contas/")({
+  validateSearch: catalogSearchSchema,
+  loaderDeps: ({ search }) => search,
+  loader: ({ deps }) => listCatalogFn({ data: deps }),
   head: () => ({
     meta: [
       { title: "Contas disponíveis | Plutão Shop" },
@@ -26,116 +38,61 @@ export const Route = createFileRoute("/contas/")({
   component: Catalogo,
 });
 
-const priceRanges = [
-  { value: "todos", label: "Todos" },
-  { value: "0-25", label: "Até €25" },
-  { value: "25-50", label: "€25 - €50" },
-  { value: "50-100", label: "€50 - €100" },
-  { value: "100+", label: "€100+" },
-];
-
-const levelRanges = [
-  { value: "todos", label: "Todos" },
-  { value: "1-30", label: "1 - 30" },
-  { value: "31-50", label: "31 - 50" },
-  { value: "51-70", label: "51 - 70" },
-  { value: "70+", label: "70+" },
-];
-
-const servers = ["Brasil", "Europa", "América Latina"] as const;
-
-const features = [
-  { key: "evolutivas", label: "Armas evolutivas" },
-  { key: "skins", label: "Skins raras" },
-  { key: "emotes", label: "Emotes raros" },
-  { key: "passes", label: "Passes antigos" },
-  { key: "colecao", label: "Itens de coleção" },
-];
-
-interface Filters {
-  price: string;
-  level: string;
-  servers: string[];
-  features: string[];
-}
-
-const emptyFilters: Filters = { price: "todos", level: "todos", servers: [], features: [] };
-
-function matchFeature(account: Account, key: string) {
-  switch (key) {
-    case "evolutivas":
-      return account.evolutionWeapons >= 3;
-    case "skins":
-      return account.skins >= 200;
-    case "emotes":
-      return account.emotes >= 10;
-    case "passes":
-      return account.passes >= 2;
-    case "colecao":
-      return account.highlights.includes("Itens de coleção");
-    default:
-      return true;
-  }
+/** Remove valores vazios para o URL ficar limpo. */
+function clean(search: CatalogSearch): CatalogSearch {
+  const result: CatalogSearch = {};
+  if (search.q) result.q = search.q;
+  if (search.preco && search.preco !== "todos") result.preco = search.preco;
+  if (search.nivel && search.nivel !== "todos") result.nivel = search.nivel;
+  if (search.servidor?.length) result.servidor = search.servidor;
+  if (search.carac?.length) result.carac = search.carac;
+  if (search.ordem && search.ordem !== "recentes") result.ordem = search.ordem;
+  if (search.pagina && search.pagina > 1) result.pagina = search.pagina;
+  return result;
 }
 
 function Catalogo() {
-  const [query, setQuery] = React.useState("");
-  const [sort, setSort] = React.useState("recentes");
-  const [filters, setFilters] = React.useState<Filters>(emptyFilters);
+  const data = Route.useLoaderData();
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const pending = useRouterState({ select: (state) => state.status === "pending" });
+  // Só depois de hidratar: no SSR o router também está "pending" e o atributo
+  // ficaria preso no HTML (o React não corrige atributos na hidratação).
+  const [hydrated, setHydrated] = React.useState(false);
+  React.useEffect(() => setHydrated(true), []);
+  const loading = hydrated && pending;
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  const [loading, setLoading] = React.useState(true);
+  const [query, setQuery] = React.useState(search.q ?? "");
 
+  const update = React.useCallback(
+    (patch: Partial<CatalogSearch>, options: { replace?: boolean } = {}) => {
+      void navigate({
+        search: (prev) => clean({ ...prev, pagina: undefined, ...patch }),
+        replace: options.replace ?? false,
+        resetScroll: false,
+      });
+    },
+    [navigate],
+  );
+
+  // Pesquisa com atraso, para não pedir ao servidor a cada tecla.
   React.useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 650);
+    const value = query.trim();
+    if (value === (search.q ?? "")) return;
+    const timer = setTimeout(() => update({ q: value || undefined }, { replace: true }), 350);
     return () => clearTimeout(timer);
-  }, []);
+  }, [query, search.q, update]);
 
-  const results = React.useMemo(() => {
-    let list = accounts.filter((account) => {
-      if (query && !account.title.toLowerCase().includes(query.toLowerCase())) return false;
+  const toggle = (group: "servidor" | "carac", value: string) => {
+    const current: string[] = search[group] ?? [];
+    const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
+    update({ [group]: next } as Partial<CatalogSearch>);
+  };
 
-      if (filters.price !== "todos") {
-        const [min = "0", max = "99999"] = filters.price.split("-");
-        if (filters.price === "100+") {
-          if (account.price < 100) return false;
-        } else if (account.price < Number(min) || account.price > Number(max)) {
-          return false;
-        }
-      }
-
-      if (filters.level !== "todos") {
-        if (filters.level === "70+") {
-          if (account.level < 70) return false;
-        } else {
-          const [min = 0, max = 999] = filters.level.split("-").map(Number);
-          if (account.level < min || account.level > max) return false;
-        }
-      }
-
-      if (filters.servers.length && !filters.servers.includes(account.server)) return false;
-      if (filters.features.length && !filters.features.every((f) => matchFeature(account, f)))
-        return false;
-
-      return true;
-    });
-
-    list = [...list].sort((x, y) => {
-      if (sort === "menor") return x.price - y.price;
-      if (sort === "maior") return y.price - x.price;
-      if (sort === "populares") return y.popularity - x.popularity;
-      return y.createdAt.localeCompare(x.createdAt);
-    });
-
-    return list;
-  }, [query, sort, filters]);
-
-  const toggle = (group: "servers" | "features", value: string) =>
-    setFilters((prev) => ({
-      ...prev,
-      [group]: prev[group].includes(value)
-        ? prev[group].filter((v) => v !== value)
-        : [...prev[group], value],
-    }));
+  const clearAll = () => {
+    setQuery("");
+    void navigate({ search: {}, resetScroll: false });
+  };
 
   const filterPanel = (
     <div className="space-y-7">
@@ -143,10 +100,10 @@ function Catalogo() {
         <Label htmlFor="filtro-preco">Preço</Label>
         <Select
           id="filtro-preco"
-          value={filters.price}
-          onChange={(e) => setFilters((p) => ({ ...p, price: e.target.value }))}
+          value={search.preco ?? "todos"}
+          onChange={(e) => update({ preco: e.target.value as CatalogSearch["preco"] })}
         >
-          {priceRanges.map((r) => (
+          {PRICE_RANGES.map((r) => (
             <option key={r.value} value={r.value}>
               {r.label}
             </option>
@@ -157,10 +114,10 @@ function Catalogo() {
         <Label htmlFor="filtro-level">Level</Label>
         <Select
           id="filtro-level"
-          value={filters.level}
-          onChange={(e) => setFilters((p) => ({ ...p, level: e.target.value }))}
+          value={search.nivel ?? "todos"}
+          onChange={(e) => update({ nivel: e.target.value as CatalogSearch["nivel"] })}
         >
-          {levelRanges.map((r) => (
+          {LEVEL_RANGES.map((r) => (
             <option key={r.value} value={r.value}>
               {r.label}
             </option>
@@ -172,12 +129,12 @@ function Catalogo() {
           Servidor
         </legend>
         <div className="space-y-2">
-          {servers.map((server) => (
+          {SERVERS.map((server) => (
             <Check
               key={server}
               label={server}
-              checked={filters.servers.includes(server)}
-              onChange={() => toggle("servers", server)}
+              checked={search.servidor?.includes(server) ?? false}
+              onChange={() => toggle("servidor", server)}
             />
           ))}
         </div>
@@ -187,17 +144,17 @@ function Catalogo() {
           Características
         </legend>
         <div className="space-y-2">
-          {features.map((feature) => (
+          {FEATURES.map((feature) => (
             <Check
-              key={feature.key}
+              key={feature.value}
               label={feature.label}
-              checked={filters.features.includes(feature.key)}
-              onChange={() => toggle("features", feature.key)}
+              checked={search.carac?.includes(feature.value) ?? false}
+              onChange={() => toggle("carac", feature.value)}
             />
           ))}
         </div>
       </fieldset>
-      <Button variant="ghost" className="w-full" onClick={() => setFilters(emptyFilters)}>
+      <Button variant="ghost" className="w-full" onClick={clearAll}>
         Limpar filtros
       </Button>
     </div>
@@ -227,19 +184,21 @@ function Catalogo() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Pesquisar contas..."
                 aria-label="Pesquisar contas"
+                maxLength={80}
                 className="pl-9"
               />
             </div>
             <Select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
+              value={search.ordem ?? "recentes"}
+              onChange={(e) => update({ ordem: e.target.value as CatalogSearch["ordem"] })}
               aria-label="Ordenar contas"
               className="sm:w-52"
             >
-              <option value="recentes">Mais recentes</option>
-              <option value="menor">Menor preço</option>
-              <option value="maior">Maior preço</option>
-              <option value="populares">Mais populares</option>
+              {SORTS.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
             </Select>
             <Button variant="outline" className="lg:hidden" onClick={() => setDrawerOpen(true)}>
               <SlidersHorizontal className="size-4" /> Filtros
@@ -247,39 +206,59 @@ function Catalogo() {
           </div>
 
           <p className="mt-5 text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">{results.length} contas</span>{" "}
-            encontradas
+            <span className="font-semibold text-foreground">
+              {data.total} {data.total === 1 ? "conta" : "contas"}
+            </span>{" "}
+            {data.total === 1 ? "encontrada" : "encontradas"}
           </p>
 
-          <div className="mt-6">
-            {loading ? (
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <AccountCardSkeleton key={i} />
-                ))}
-              </div>
-            ) : results.length ? (
-              <AccountGrid accounts={results} />
+          <div className={cn("mt-6 transition-opacity", loading && "opacity-60")}>
+            {data.items.length ? (
+              <AccountGrid accounts={data.items} />
             ) : (
               <EmptyState
                 icon={<PackageSearch className="size-6" />}
                 title="Nenhuma conta encontrada."
                 description="Experimente alterar seus filtros."
                 actionLabel="Limpar filtros"
-                onAction={() => {
-                  setFilters(emptyFilters);
-                  setQuery("");
-                }}
+                onAction={clearAll}
               />
             )}
           </div>
+
+          {data.pageCount > 1 ? (
+            <nav
+              aria-label="Paginação"
+              className="mt-10 flex items-center justify-center gap-3 text-sm"
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={data.page <= 1}
+                onClick={() => update({ pagina: data.page - 1 })}
+              >
+                <ChevronLeft className="size-4" /> Anterior
+              </Button>
+              <span className="text-muted-foreground">
+                Página {data.page} de {data.pageCount}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={data.page >= data.pageCount}
+                onClick={() => update({ pagina: data.page + 1 })}
+              >
+                Seguinte <ChevronRight className="size-4" />
+              </Button>
+            </nav>
+          ) : null}
         </div>
       </div>
 
       <Modal open={drawerOpen} onOpenChange={setDrawerOpen} title="Filtros">
         {filterPanel}
         <Button className="mt-6 w-full" onClick={() => setDrawerOpen(false)}>
-          Ver {results.length} contas
+          Ver {data.total} contas
         </Button>
       </Modal>
     </StoreLayout>

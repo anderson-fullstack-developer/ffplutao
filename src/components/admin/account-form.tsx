@@ -73,6 +73,7 @@ export function AccountForm({ account }: { account?: Account }) {
           </Field>
           <Field label="Servidor" htmlFor="f-servidor">
             <Select id="f-servidor" defaultValue={account?.server}>
+              <option>África e o Oriente Médio</option>
               <option>Brasil</option>
               <option>Europa</option>
               <option>América Latina</option>

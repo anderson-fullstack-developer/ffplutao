@@ -35,10 +35,12 @@
 
 **Teste:** criar conta, fazer login; um USER a tentar abrir `/admin` é bloqueado.
 
-## Fase 3 — Catálogo real
-- [ ] 13. Páginas passam a ler da base de dados em vez de `src/mock/`
-- [ ] 14. Filtros, pesquisa e ordenação feitos no servidor
-- [ ] 15. API pública **nunca** devolve credenciais (tipos públicos e privados separados)
+## Fase 3 — Catálogo real ✅
+- [x] 13. Início, catálogo, detalhe e checkout leem da base de dados (admin e dashboard continuam mock até às Fases 4 e 6)
+- [x] 14. Filtros, pesquisa, ordenação e paginação no servidor; filtros guardados no URL (links partilháveis)
+- [x] 15. API pública com lista explícita de colunas (`src/server/catalog/queries.ts`); rascunho/desativada → 404; vendida sai do catálogo mas o link abre; reserva expirada conta como disponível; imagens otimizadas pelo Cloudinary
+
+**Verificado:** 37 testes (filtros comparados com contagens diretas na BD, pesquisa com `%`/SQL malicioso, estados reservada/expirada/vendida, nenhum dado privado nas respostas nem no HTML).
 
 **Teste:** o catálogo mostra os dados do seed.
 
@@ -89,6 +91,6 @@
 - [ ] Formulário do admin: trocar "Status: Disponível/Reservada/Vendida" por **Rascunho / Publicada / Desativada** (Fase 4)
 - [ ] Checkout: remover os campos nome/email/país; deixar só o resumo e o botão **"Pagar com Stripe"** (Fase 5)
 - [ ] `/compra/sucesso`: estado **"A confirmar pagamento…"** antes de "Compra concluída" (Fase 5)
-- [ ] Badges: acrescentar **Rascunho**, **Desativada**, **Falhado** (Fase 3)
+- [x] Badges: acrescentar **Rascunho**, **Desativada**, **Falhado** (Fase 3)
 - [x] Remover o botão "Continuar com Google" do login, até haver decisão sobre login social (Fase 2)
 - [ ] Tirar `credentials` do tipo `Order` do frontend (Fase 6)

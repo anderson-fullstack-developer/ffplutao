@@ -6,6 +6,7 @@ import {
   Gamepad2,
   Globe2,
   Headphones,
+  ImageOff,
   Info,
   LayoutDashboard,
   ShieldCheck,
@@ -21,11 +22,12 @@ import { StoreLayout } from "@/components/store/store-layout";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PriceDisplay } from "@/components/ui/misc";
-import { getAccount } from "@/mock/accounts";
+import { getPublicAccountFn } from "@/functions/catalog";
+import { centsToEuros } from "@/lib/catalog";
 
 export const Route = createFileRoute("/contas/$id")({
-  loader: ({ params }) => {
-    const account = getAccount(params.id);
+  loader: async ({ params }) => {
+    const account = await getPublicAccountFn({ data: { id: params.id } });
     if (!account) throw notFound();
     return { account };
   },
@@ -50,6 +52,7 @@ function AccountDetail() {
   const { account } = Route.useLoaderData();
   const [active, setActive] = React.useState(0);
   const [lightbox, setLightbox] = React.useState(false);
+  const current = account.images[active];
 
   const items = [
     { icon: Swords, label: "Armas evolutivas", value: String(account.evolutionWeapons) },
@@ -63,7 +66,11 @@ function AccountDetail() {
   const info = [
     { icon: Gamepad2, label: "Level", value: String(account.level) },
     { icon: Globe2, label: "Servidor", value: account.server },
-    { icon: CalendarDays, label: "Conta criada em", value: String(account.year) },
+    {
+      icon: CalendarDays,
+      label: "Conta criada em",
+      value: account.accountYear ? String(account.accountYear) : "—",
+    },
     { icon: Sparkles, label: "Skins", value: `${account.skins}+` },
     { icon: Swords, label: "Armas evolutivas", value: String(account.evolutionWeapons) },
     { icon: Smile, label: "Emotes raros", value: `${account.emotes}+` },
@@ -87,19 +94,25 @@ function AccountDetail() {
         <div className="grid gap-10 lg:grid-cols-[1.15fr_1fr]">
           {/* Galeria */}
           <div>
-            <button
-              type="button"
-              onClick={() => setLightbox(true)}
-              className="surface-panel block w-full cursor-zoom-in overflow-hidden"
-            >
-              <img
-                src={account.images[active]}
-                alt={`Screenshot ${active + 1} da ${account.title}`}
-                width={1024}
-                height={640}
-                className="aspect-[16/10] w-full object-cover"
-              />
-            </button>
+            {current ? (
+              <button
+                type="button"
+                onClick={() => setLightbox(true)}
+                className="surface-panel block w-full cursor-zoom-in overflow-hidden"
+              >
+                <img
+                  src={current.url}
+                  alt={`Screenshot ${active + 1} da ${account.title}`}
+                  width={current.width ?? 1024}
+                  height={current.height ?? 640}
+                  className="aspect-[16/10] w-full object-cover"
+                />
+              </button>
+            ) : (
+              <div className="surface-panel flex aspect-[16/10] w-full items-center justify-center text-muted-foreground">
+                <ImageOff className="size-10" />
+              </div>
+            )}
             <div className="mt-4 grid grid-cols-4 gap-3">
               {account.images.map((image, index) => (
                 <button
@@ -114,7 +127,7 @@ function AccountDetail() {
                   }`}
                 >
                   <img
-                    src={image}
+                    src={image.thumbUrl}
                     alt={`Miniatura ${index + 1} da ${account.title}`}
                     loading="lazy"
                     width={1024}
@@ -135,7 +148,7 @@ function AccountDetail() {
             <div className="surface-panel mt-6 flex items-end justify-between gap-4 p-5">
               <div>
                 <p className="text-xs text-muted-foreground">Preço final</p>
-                <PriceDisplay value={account.price} size="lg" />
+                <PriceDisplay value={centsToEuros(account.priceCents)} size="lg" />
               </div>
               <p className="text-right text-xs text-muted-foreground">
                 Pagamento único
@@ -160,11 +173,19 @@ function AccountDetail() {
             </dl>
 
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
-              <Button asChild size="lg" className="sm:col-span-2">
-                <Link to="/checkout/$id" params={{ id: account.id }}>
-                  Comprar agora
-                </Link>
-              </Button>
+              {account.status === "AVAILABLE" ? (
+                <Button asChild size="lg" className="sm:col-span-2">
+                  <Link to="/checkout/$id" params={{ id: account.id }}>
+                    Comprar agora
+                  </Link>
+                </Button>
+              ) : (
+                <Button size="lg" className="sm:col-span-2" disabled>
+                  {account.status === "SOLD"
+                    ? "Conta vendida"
+                    : "Reservada — tente dentro de alguns minutos"}
+                </Button>
+              )}
               <Button asChild size="lg" variant="outline" className="sm:col-span-2">
                 <Link to="/suporte">
                   <Headphones className="size-4" /> Falar com suporte
@@ -216,7 +237,15 @@ function AccountDetail() {
           </Tabs.List>
 
           <Tabs.Content value="visao" className="pt-6">
-            <p className="max-w-3xl text-muted-foreground">{account.description}</p>
+            <p className="max-w-3xl whitespace-pre-line text-muted-foreground">
+              {account.description}
+            </p>
+            {account.observations ? (
+              <p className="mt-4 max-w-3xl text-sm whitespace-pre-line text-muted-foreground">
+                <span className="font-semibold text-foreground">Observações: </span>
+                {account.observations}
+              </p>
+            ) : null}
             <div className="mt-5 flex flex-wrap gap-2">
               {account.highlights.map((h) => (
                 <span
@@ -265,7 +294,7 @@ function AccountDetail() {
         </Tabs.Root>
       </div>
 
-      {lightbox ? (
+      {lightbox && current ? (
         <div
           className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
           onClick={() => setLightbox(false)}
@@ -278,7 +307,7 @@ function AccountDetail() {
             <X className="size-6" />
           </button>
           <img
-            src={account.images[active]}
+            src={current.url}
             alt={`Screenshot ampliada da ${account.title}`}
             className="max-h-[85vh] w-auto rounded-xl"
           />

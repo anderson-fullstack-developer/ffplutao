@@ -6,10 +6,12 @@ export function formatPrice(value: number): string {
 }
 
 export function formatDate(iso: string): string {
+  // Fuso fixo: servidor (UTC na Vercel) e browser mostram sempre a mesma data.
   return new Intl.DateTimeFormat("pt-PT", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    timeZone: "Europe/Lisbon",
   }).format(new Date(iso));
 }
 

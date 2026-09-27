@@ -4,7 +4,8 @@ import { Loader2, Lock, ShieldCheck } from "lucide-react";
 import { StoreLayout } from "@/components/store/store-layout";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
-import { getAccount } from "@/mock/accounts";
+import { getPublicAccountFn } from "@/functions/catalog";
+import { centsToEuros } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
 
 export const Route = createFileRoute("/checkout/$id")({
@@ -14,8 +15,8 @@ export const Route = createFileRoute("/checkout/$id")({
       throw redirect({ to: "/login", search: { redirect: location.href } });
     }
   },
-  loader: ({ params }) => {
-    const account = getAccount(params.id);
+  loader: async ({ params }) => {
+    const account = await getPublicAccountFn({ data: { id: params.id } });
     if (!account) throw notFound();
     return { account };
   },
@@ -34,6 +35,7 @@ function Checkout() {
   const { account } = Route.useLoaderData();
   const navigate = useNavigate();
   const [loading, setLoading] = React.useState(false);
+  const available = account.status === "AVAILABLE";
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -76,7 +78,14 @@ function Checkout() {
               </p>
             </div>
 
-            <Button type="submit" size="lg" className="w-full" disabled={loading}>
+            {!available ? (
+              <p className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2.5 text-sm text-warning">
+                {account.status === "SOLD"
+                  ? "Esta conta já foi vendida."
+                  : "Esta conta está reservada por outro cliente. Tente dentro de alguns minutos."}
+              </p>
+            ) : null}
+            <Button type="submit" size="lg" className="w-full" disabled={loading || !available}>
               {loading ? (
                 <>
                   <Loader2 className="size-4 animate-spin" /> A processar...
@@ -91,7 +100,7 @@ function Checkout() {
             <h2 className="font-bold">Resumo do pedido</h2>
             <div className="mt-5 flex gap-4">
               <img
-                src={account.images[0]}
+                src={account.images[0]?.thumbUrl}
                 alt={account.title}
                 loading="lazy"
                 width={1024}
@@ -103,18 +112,20 @@ function Checkout() {
                 <p className="text-xs text-muted-foreground">
                   Nível {account.level} · {account.server}
                 </p>
-                <p className="mt-1 text-sm font-bold">{formatPrice(account.price)}</p>
+                <p className="mt-1 text-sm font-bold">
+                  {formatPrice(centsToEuros(account.priceCents))}
+                </p>
               </div>
             </div>
 
             <dl className="mt-6 space-y-2 border-t border-border pt-5 text-sm">
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Subtotal</dt>
-                <dd>{formatPrice(account.price)}</dd>
+                <dd>{formatPrice(centsToEuros(account.priceCents))}</dd>
               </div>
               <div className="flex justify-between border-t border-border pt-3 text-base font-bold">
                 <dt>Total</dt>
-                <dd className="gold-text">{formatPrice(account.price)}</dd>
+                <dd className="gold-text">{formatPrice(centsToEuros(account.priceCents))}</dd>
               </div>
             </dl>
 

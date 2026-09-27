@@ -15,9 +15,11 @@ import { AccountGrid } from "@/components/store/account-card";
 import { Button } from "@/components/ui/button";
 import { PriceDisplay } from "@/components/ui/misc";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { accounts, featuredAccounts } from "@/mock/accounts";
+import { getFeaturedFn } from "@/functions/catalog";
+import { centsToEuros } from "@/lib/catalog";
 
 export const Route = createFileRoute("/")({
+  loader: () => getFeaturedFn(),
   head: () => ({
     meta: [
       { title: "Plutão Shop | Contas Free Fire selecionadas" },
@@ -70,8 +72,8 @@ const trust = [
 ];
 
 function Home() {
+  const { items: featuredAccounts, availableCount } = Route.useLoaderData();
   const [a, b, c] = featuredAccounts;
-  if (!a || !b || !c) return null;
 
   return (
     <StoreLayout>
@@ -81,7 +83,7 @@ function Home() {
           <div className="animate-fade-in">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">
               <ShieldCheck className="size-3.5" />
-              {accounts.length} contas listadas hoje
+              {availableCount} {availableCount === 1 ? "conta disponível" : "contas disponíveis"}
             </span>
             <h1 className="font-display mt-6 text-4xl leading-[1.05] font-extrabold sm:text-5xl lg:text-6xl">
               Encontre a conta de <span className="gold-text">Free Fire</span> ideal para você
@@ -110,42 +112,64 @@ function Home() {
             </ul>
           </div>
 
-          <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
-            <div className="surface-panel overflow-hidden">
-              <img
-                src={a.images[0]}
-                alt={`Destaque da ${a.title}`}
-                width={1024}
-                height={640}
-                className="aspect-[16/10] w-full object-cover"
-              />
-              <div className="flex items-center justify-between gap-4 p-5">
-                <div>
-                  <StatusBadge status={a.status} />
-                  <p className="mt-2 font-bold">{a.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Nível {a.level} · {a.server} · {a.skins}+ skins
-                  </p>
+          {a ? (
+            <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
+              <Link
+                to="/contas/$id"
+                params={{ id: a.id }}
+                className="surface-panel block overflow-hidden transition-colors hover:border-primary/45"
+              >
+                {a.images[0] ? (
+                  <img
+                    src={a.images[0].url}
+                    alt={`Destaque da ${a.title}`}
+                    width={a.images[0].width ?? 1024}
+                    height={a.images[0].height ?? 640}
+                    className="aspect-[16/10] w-full object-cover"
+                  />
+                ) : null}
+                <div className="flex items-center justify-between gap-4 p-5">
+                  <div>
+                    <StatusBadge status={a.status} />
+                    <p className="mt-2 font-bold">{a.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Nível {a.level} · {a.server} · {a.skins}+ skins
+                    </p>
+                  </div>
+                  <PriceDisplay value={centsToEuros(a.priceCents)} />
                 </div>
-                <PriceDisplay value={a.price} />
-              </div>
-            </div>
+              </Link>
 
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="surface-panel p-4">
-                <p className="text-xs text-muted-foreground">{b.title}</p>
-                <PriceDisplay value={b.price} size="sm" />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {b.evolutionWeapons} armas evolutivas
-                </p>
-              </div>
-              <div className="surface-panel p-4">
-                <p className="text-xs text-muted-foreground">{c.title}</p>
-                <PriceDisplay value={c.price} size="sm" />
-                <p className="mt-1 text-xs text-muted-foreground">{c.emotes}+ emotes raros</p>
-              </div>
+              {b || c ? (
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  {b ? (
+                    <Link
+                      to="/contas/$id"
+                      params={{ id: b.id }}
+                      className="surface-panel p-4 transition-colors hover:border-primary/45"
+                    >
+                      <p className="text-xs text-muted-foreground">{b.title}</p>
+                      <PriceDisplay value={centsToEuros(b.priceCents)} size="sm" />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {b.evolutionWeapons} armas evolutivas
+                      </p>
+                    </Link>
+                  ) : null}
+                  {c ? (
+                    <Link
+                      to="/contas/$id"
+                      params={{ id: c.id }}
+                      className="surface-panel p-4 transition-colors hover:border-primary/45"
+                    >
+                      <p className="text-xs text-muted-foreground">{c.title}</p>
+                      <PriceDisplay value={centsToEuros(c.priceCents)} size="sm" />
+                      <p className="mt-1 text-xs text-muted-foreground">{c.emotes}+ emotes raros</p>
+                    </Link>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
-          </div>
+          ) : null}
         </div>
       </section>
 
@@ -164,7 +188,11 @@ function Home() {
             </Link>
           </Button>
         </div>
-        <AccountGrid accounts={featuredAccounts} />
+        {featuredAccounts.length ? (
+          <AccountGrid accounts={featuredAccounts} />
+        ) : (
+          <p className="text-muted-foreground">Novas contas em breve.</p>
+        )}
       </section>
 
       {/* Como funciona */}

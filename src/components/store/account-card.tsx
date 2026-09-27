@@ -1,22 +1,30 @@
 import { Link } from "@tanstack/react-router";
-import { Gamepad2, Globe2, Sparkles, Swords } from "lucide-react";
-import type { Account } from "@/types";
+import { Gamepad2, Globe2, ImageOff, Sparkles, Swords } from "lucide-react";
+import { centsToEuros, type PublicAccount } from "@/lib/catalog";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PriceDisplay } from "@/components/ui/misc";
 import { Button } from "@/components/ui/button";
 
-export function AccountCard({ account }: { account: Account }) {
+export function AccountCard({ account }: { account: PublicAccount }) {
+  const cover = account.images[0];
+
   return (
     <article className="surface-panel group flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-primary/45 hover:shadow-[0_24px_50px_-28px_oklch(0.82_0.165_78/0.6)]">
       <div className="relative aspect-[16/10] overflow-hidden">
-        <img
-          src={account.images[0]}
-          alt={`Screenshot da ${account.title}`}
-          loading="lazy"
-          width={1024}
-          height={640}
-          className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+        {cover ? (
+          <img
+            src={cover.thumbUrl}
+            alt={`Screenshot da ${account.title}`}
+            loading="lazy"
+            width={cover.width ?? 1024}
+            height={cover.height ?? 640}
+            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex size-full items-center justify-center bg-surface text-muted-foreground">
+            <ImageOff className="size-8" />
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
         <div className="absolute top-3 left-3">
           <StatusBadge status={account.status} />
@@ -44,10 +52,10 @@ export function AccountCard({ account }: { account: Account }) {
           />
         </dl>
 
-        <div className="mt-5 flex items-end justify-between gap-3 border-t border-border/70 pt-4">
+        <div className="mt-auto flex items-end justify-between gap-3 border-t border-border/70 pt-4">
           <div>
             <p className="text-xs text-muted-foreground">Preço</p>
-            <PriceDisplay value={account.price} />
+            <PriceDisplay value={centsToEuros(account.priceCents)} />
           </div>
           <Button asChild size="sm">
             <Link to="/contas/$id" params={{ id: account.id }}>
@@ -72,7 +80,7 @@ function Spec({ icon, label, value }: { icon: React.ReactNode; label: string; va
   );
 }
 
-export function AccountGrid({ accounts }: { accounts: Account[] }) {
+export function AccountGrid({ accounts }: { accounts: PublicAccount[] }) {
   return (
     <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
       {accounts.map((account) => (
