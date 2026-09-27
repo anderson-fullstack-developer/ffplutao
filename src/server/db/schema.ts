@@ -284,13 +284,38 @@ export const supportTickets = pgTable(
       .references(() => users.id, { onDelete: "restrict" }),
     orderId: uuid("order_id").references(() => orders.id, { onDelete: "set null" }),
     subject: text("subject").notNull(),
-    message: text("message").notNull(),
     status: ticketStatus("status").notNull().default("OPEN"),
+    /** true quando a última mensagem é do cliente (o admin tem de responder). */
+    awaitingAdmin: boolean("awaiting_admin").notNull().default(true),
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true }).notNull().defaultNow(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [
     index("support_tickets_user_idx").on(t.userId, t.createdAt),
     index("support_tickets_status_idx").on(t.status, t.createdAt),
+    index("support_tickets_inbox_idx").on(t.awaitingAdmin, t.status, t.lastMessageAt),
+  ],
+);
+
+/** Conversa de um ticket (a primeira mensagem é a do cliente ao abrir o ticket). */
+export const supportMessages = pgTable(
+  "support_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ticketId: uuid("ticket_id")
+      .notNull()
+      .references(() => supportTickets.id, { onDelete: "cascade" }),
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    /** Resposta da equipa (admin) ou do cliente. */
+    fromAdmin: boolean("from_admin").notNull(),
+    body: text("body").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    check("support_messages_body_not_empty", sql`length(trim(${t.body})) > 0`),
+    index("support_messages_ticket_idx").on(t.ticketId, t.createdAt),
   ],
 );

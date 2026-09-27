@@ -28,9 +28,13 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardPerfilRouteImport } from './routes/dashboard/perfil'
 import { Route as AdminContasIndexRouteImport } from './routes/admin/contas/index'
 import { Route as AdminContasNovaRouteImport } from './routes/admin/contas/nova'
+import { Route as AdminTicketsIndexRouteImport } from './routes/admin/tickets/index'
+import { Route as AdminTicketsIdRouteImport } from './routes/admin/tickets/$id'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 import { Route as DashboardComprasIndexRouteImport } from './routes/dashboard/compras/index'
 import { Route as DashboardComprasIdRouteImport } from './routes/dashboard/compras/$id'
+import { Route as DashboardSuporteIndexRouteImport } from './routes/dashboard/suporte/index'
+import { Route as DashboardSuporteIdRouteImport } from './routes/dashboard/suporte/$id'
 import { Route as AdminContasIdEditarRouteImport } from './routes/admin/contas/$id.editar'
 
 const IndexRoute = IndexRouteImport.update({
@@ -128,6 +132,16 @@ const AdminContasNovaRoute = AdminContasNovaRouteImport.update({
   path: '/contas/nova',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminTicketsIndexRoute = AdminTicketsIndexRouteImport.update({
+  id: '/tickets/',
+  path: '/tickets/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminTicketsIdRoute = AdminTicketsIdRouteImport.update({
+  id: '/tickets/$id',
+  path: '/tickets/$id',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   id: '/api/stripe/webhook',
   path: '/api/stripe/webhook',
@@ -141,6 +155,16 @@ const DashboardComprasIndexRoute = DashboardComprasIndexRouteImport.update({
 const DashboardComprasIdRoute = DashboardComprasIdRouteImport.update({
   id: '/compras/$id',
   path: '/compras/$id',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardSuporteIndexRoute = DashboardSuporteIndexRouteImport.update({
+  id: '/suporte/',
+  path: '/suporte/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardSuporteIdRoute = DashboardSuporteIdRouteImport.update({
+  id: '/suporte/$id',
+  path: '/suporte/$id',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const AdminContasIdEditarRoute = AdminContasIdEditarRouteImport.update({
@@ -168,10 +192,14 @@ export interface FileRoutesByFullPath {
   '/contas/': typeof ContasIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/admin/contas/nova': typeof AdminContasNovaRoute
+  '/admin/tickets/$id': typeof AdminTicketsIdRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/dashboard/compras/$id': typeof DashboardComprasIdRoute
+  '/dashboard/suporte/$id': typeof DashboardSuporteIdRoute
   '/admin/contas/': typeof AdminContasIndexRoute
+  '/admin/tickets/': typeof AdminTicketsIndexRoute
   '/dashboard/compras/': typeof DashboardComprasIndexRoute
+  '/dashboard/suporte/': typeof DashboardSuporteIndexRoute
   '/admin/contas/$id/editar': typeof AdminContasIdEditarRoute
 }
 export interface FileRoutesByTo {
@@ -191,10 +219,14 @@ export interface FileRoutesByTo {
   '/contas': typeof ContasIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/admin/contas/nova': typeof AdminContasNovaRoute
+  '/admin/tickets/$id': typeof AdminTicketsIdRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/dashboard/compras/$id': typeof DashboardComprasIdRoute
+  '/dashboard/suporte/$id': typeof DashboardSuporteIdRoute
   '/admin/contas': typeof AdminContasIndexRoute
+  '/admin/tickets': typeof AdminTicketsIndexRoute
   '/dashboard/compras': typeof DashboardComprasIndexRoute
+  '/dashboard/suporte': typeof DashboardSuporteIndexRoute
   '/admin/contas/$id/editar': typeof AdminContasIdEditarRoute
 }
 export interface FileRoutesById {
@@ -217,10 +249,14 @@ export interface FileRoutesById {
   '/contas/': typeof ContasIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/admin/contas/nova': typeof AdminContasNovaRoute
+  '/admin/tickets/$id': typeof AdminTicketsIdRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
   '/dashboard/compras/$id': typeof DashboardComprasIdRoute
+  '/dashboard/suporte/$id': typeof DashboardSuporteIdRoute
   '/admin/contas/': typeof AdminContasIndexRoute
+  '/admin/tickets/': typeof AdminTicketsIndexRoute
   '/dashboard/compras/': typeof DashboardComprasIndexRoute
+  '/dashboard/suporte/': typeof DashboardSuporteIndexRoute
   '/admin/contas/$id/editar': typeof AdminContasIdEditarRoute
 }
 export interface FileRouteTypes {
@@ -244,10 +280,14 @@ export interface FileRouteTypes {
     | '/contas/'
     | '/dashboard/'
     | '/admin/contas/nova'
+    | '/admin/tickets/$id'
     | '/api/stripe/webhook'
     | '/dashboard/compras/$id'
+    | '/dashboard/suporte/$id'
     | '/admin/contas/'
+    | '/admin/tickets/'
     | '/dashboard/compras/'
+    | '/dashboard/suporte/'
     | '/admin/contas/$id/editar'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -267,10 +307,14 @@ export interface FileRouteTypes {
     | '/contas'
     | '/dashboard'
     | '/admin/contas/nova'
+    | '/admin/tickets/$id'
     | '/api/stripe/webhook'
     | '/dashboard/compras/$id'
+    | '/dashboard/suporte/$id'
     | '/admin/contas'
+    | '/admin/tickets'
     | '/dashboard/compras'
+    | '/dashboard/suporte'
     | '/admin/contas/$id/editar'
   id:
     | '__root__'
@@ -292,10 +336,14 @@ export interface FileRouteTypes {
     | '/contas/'
     | '/dashboard/'
     | '/admin/contas/nova'
+    | '/admin/tickets/$id'
     | '/api/stripe/webhook'
     | '/dashboard/compras/$id'
+    | '/dashboard/suporte/$id'
     | '/admin/contas/'
+    | '/admin/tickets/'
     | '/dashboard/compras/'
+    | '/dashboard/suporte/'
     | '/admin/contas/$id/editar'
   fileRoutesById: FileRoutesById
 }
@@ -450,6 +498,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContasNovaRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/tickets/': {
+      id: '/admin/tickets/'
+      path: '/tickets'
+      fullPath: '/admin/tickets/'
+      preLoaderRoute: typeof AdminTicketsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/tickets/$id': {
+      id: '/admin/tickets/$id'
+      path: '/tickets/$id'
+      fullPath: '/admin/tickets/$id'
+      preLoaderRoute: typeof AdminTicketsIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/api/stripe/webhook': {
       id: '/api/stripe/webhook'
       path: '/api/stripe/webhook'
@@ -471,6 +533,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardComprasIdRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/suporte/': {
+      id: '/dashboard/suporte/'
+      path: '/suporte'
+      fullPath: '/dashboard/suporte/'
+      preLoaderRoute: typeof DashboardSuporteIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/suporte/$id': {
+      id: '/dashboard/suporte/$id'
+      path: '/suporte/$id'
+      fullPath: '/dashboard/suporte/$id'
+      preLoaderRoute: typeof DashboardSuporteIdRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/admin/contas/$id/editar': {
       id: '/admin/contas/$id/editar'
       path: '/contas/$id/editar'
@@ -486,7 +562,9 @@ interface AdminRouteRouteChildren {
   AdminPedidosRoute: typeof AdminPedidosRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminContasNovaRoute: typeof AdminContasNovaRoute
+  AdminTicketsIdRoute: typeof AdminTicketsIdRoute
   AdminContasIndexRoute: typeof AdminContasIndexRoute
+  AdminTicketsIndexRoute: typeof AdminTicketsIndexRoute
   AdminContasIdEditarRoute: typeof AdminContasIdEditarRoute
 }
 
@@ -495,7 +573,9 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminPedidosRoute: AdminPedidosRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminContasNovaRoute: AdminContasNovaRoute,
+  AdminTicketsIdRoute: AdminTicketsIdRoute,
   AdminContasIndexRoute: AdminContasIndexRoute,
+  AdminTicketsIndexRoute: AdminTicketsIndexRoute,
   AdminContasIdEditarRoute: AdminContasIdEditarRoute,
 }
 
@@ -507,14 +587,18 @@ interface DashboardRouteRouteChildren {
   DashboardPerfilRoute: typeof DashboardPerfilRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardComprasIdRoute: typeof DashboardComprasIdRoute
+  DashboardSuporteIdRoute: typeof DashboardSuporteIdRoute
   DashboardComprasIndexRoute: typeof DashboardComprasIndexRoute
+  DashboardSuporteIndexRoute: typeof DashboardSuporteIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardPerfilRoute: DashboardPerfilRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardComprasIdRoute: DashboardComprasIdRoute,
+  DashboardSuporteIdRoute: DashboardSuporteIdRoute,
   DashboardComprasIndexRoute: DashboardComprasIndexRoute,
+  DashboardSuporteIndexRoute: DashboardSuporteIndexRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(

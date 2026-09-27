@@ -10,7 +10,7 @@ const items = [
   { to: "/dashboard", label: "Visão geral", icon: LayoutGrid, exact: true },
   { to: "/dashboard/compras", label: "Minhas compras", icon: ShoppingBag },
   { to: "/dashboard/perfil", label: "Minha conta", icon: User },
-  { to: "/suporte", label: "Suporte", icon: LifeBuoy },
+  { to: "/dashboard/suporte", label: "Suporte", icon: LifeBuoy },
 ];
 
 export function DashboardShell({

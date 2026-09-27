@@ -80,7 +80,7 @@
 **Teste:** o utilizador B pede as credenciais do pedido do utilizador A → **403**.
 
 ## Fase 7 — Suporte e extras
-- [ ] 28. Tickets de suporte (ligação opcional a um pedido)
+- [x] 28. Tickets de suporte (adiantado): conversa cliente ↔ equipa, ligação a um pedido do próprio cliente, estados Aberto/Em andamento/Fechado (reabre se o cliente responder), caixa "Tickets" no admin com contador de "por responder", limite de envios. 33 testes (acesso, ciclo de estados, XSS, limite).
 - [ ] 29. Emails transacionais (Resend) — **nunca** enviar credenciais por email
 - [ ] 30. Recuperação de password
 
