@@ -58,8 +58,8 @@ function Sucesso() {
         title="A confirmar o pagamento..."
         text={
           waitedTooLong
-            ? "A confirmação está a demorar mais do que o normal. Pode fechar esta página: assim que o Stripe confirmar, a compra aparece nas suas compras."
-            : "Estamos a aguardar a confirmação do Stripe. Isto demora normalmente poucos segundos."
+            ? "A confirmação está a demorar mais do que o normal. Pode fechar esta página: assim que o pagamento for confirmado, a compra aparece nas suas compras."
+            : "Estamos a aguardar a confirmação do pagamento. Isto demora normalmente poucos segundos."
         }
       />
     );

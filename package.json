@@ -15,7 +15,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/server/db/seed.ts",
-    "admin:create": "tsx src/server/cli/create-admin.ts"
+    "admin:create": "tsx src/server/cli/create-admin.ts",
+    "brand:upload": "tsx src/server/cli/upload-brand.ts"
   },
   "overrides": {
     "rolldown": "1.2.1"

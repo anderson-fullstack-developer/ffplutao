@@ -6,6 +6,7 @@ import type { SessionUser } from "../auth/session";
 import { getDb } from "../db/client";
 import { accountImages, accounts, orders } from "../db/schema";
 import { serverEnv } from "../env";
+import { checkoutBranding } from "./branding";
 import { getStripe, type Stripe } from "./stripe";
 
 /**
@@ -216,6 +217,14 @@ export async function startCheckout(
         mode: "payment",
         payment_method_types: ["card"],
         locale: "pt",
+        submit_type: "pay",
+        branding_settings: checkoutBranding(),
+        custom_text: {
+          submit: {
+            message:
+              "Depois do pagamento, os dados da conta ficam disponíveis na sua área de cliente da Plutão Shop.",
+          },
+        },
         customer_email: user.email,
         client_reference_id: prepared.orderId,
         metadata,

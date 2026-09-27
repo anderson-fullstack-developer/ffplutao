@@ -46,7 +46,7 @@ function Checkout() {
         setLoading(false);
         return;
       }
-      // Página de pagamento segura do Stripe (os dados do cartão nunca passam por nós).
+      // Página de pagamento segura (Stripe): os dados do cartão nunca passam por nós.
       window.location.assign(result.url);
     } catch {
       setError("Não foi possível iniciar o pagamento. Tente novamente.");
@@ -59,7 +59,7 @@ function Checkout() {
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
         <h1 className="font-display text-3xl font-extrabold">Finalizar compra</h1>
         <p className="mt-2 text-muted-foreground">
-          Reveja o pedido. O pagamento é feito na página segura do Stripe.
+          Reveja o pedido e avance para o pagamento seguro.
         </p>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1.2fr_1fr]">
@@ -78,7 +78,7 @@ function Checkout() {
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li className="flex gap-3">
                 <CreditCard className="mt-0.5 size-4 shrink-0 text-primary" />
-                Cartão de crédito/débito, Apple Pay ou Google Pay, processados pelo Stripe.
+                Cartão de crédito ou débito, Apple Pay e Google Pay.
               </li>
               <li className="flex gap-3">
                 <Clock className="mt-0.5 size-4 shrink-0 text-primary" />
@@ -106,7 +106,7 @@ function Checkout() {
                   <Loader2 className="size-4 animate-spin" /> A abrir o pagamento...
                 </>
               ) : (
-                `Pagar ${price} com Stripe`
+                `Pagar ${price}`
               )}
             </Button>
           </section>
